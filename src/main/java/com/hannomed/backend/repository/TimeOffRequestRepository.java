@@ -9,6 +9,14 @@ import java.util.List;
 @Repository
 public interface TimeOffRequestRepository extends JpaRepository<TimeOffRequest, Integer> {
     List<TimeOffRequest> findByEmployeeIdOrderByStartDateDesc(Integer employeeId);
+
     List<TimeOffRequest> findByEmployeeIdAndStartDateBetweenOrderByStartDateDesc(
             Integer employeeId, java.time.LocalDate start, java.time.LocalDate end);
+
+    // Admin queries
+    List<TimeOffRequest> findByStatusOrderByCreatedAtDesc(String status);
+
+    List<TimeOffRequest> findAllByOrderByCreatedAtDesc();
+
+    long countByStatus(String status);
 }
