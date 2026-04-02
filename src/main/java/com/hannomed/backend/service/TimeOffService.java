@@ -80,6 +80,8 @@ public class TimeOffService {
             item.put("status", req.getStatus());
             item.put("createdAt", req.getCreatedAt() != null ? req.getCreatedAt().toString() : null);
             item.put("updatedAt", req.getUpdatedAt() != null ? req.getUpdatedAt().toString() : null);
+            item.put("approvedBy", req.getApprovedBy() != null ? req.getApprovedBy() : "");
+            item.put("rejectionReason", req.getRejectionReason() != null ? req.getRejectionReason() : "");
 
             String status = req.getStatus();
             if (result.containsKey(status)) {

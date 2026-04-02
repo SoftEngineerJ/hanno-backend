@@ -38,6 +38,12 @@ public class TimeOffRequest {
     @Column(name = "updated_at", columnDefinition = "timestamp")
     private LocalDateTime updatedAt;
 
+    @Column(name = "approved_by")
+    private String approvedBy;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

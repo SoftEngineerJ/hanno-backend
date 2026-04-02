@@ -40,8 +40,11 @@ public class AdminTimeOffController {
     }
 
     @PostMapping("/requests/{id}/approve")
-    public ResponseEntity<Map<String, Object>> approveRequest(@PathVariable Integer id) {
-        boolean success = adminTimeOffService.approveRequest(id);
+    public ResponseEntity<Map<String, Object>> approveRequest(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String token) {
+        String adminName = extractAdminName(token);
+        boolean success = adminTimeOffService.approveRequest(id, adminName);
         if (success) {
             return ResponseEntity.ok(Map.of("success", true, "message", "Antrag genehmigt"));
         }
@@ -49,12 +52,38 @@ public class AdminTimeOffController {
     }
 
     @PostMapping("/requests/{id}/reject")
-    public ResponseEntity<Map<String, Object>> rejectRequest(@PathVariable Integer id) {
-        boolean success = adminTimeOffService.rejectRequest(id);
+    public ResponseEntity<Map<String, Object>> rejectRequest(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String token) {
+        String adminName = extractAdminName(token);
+        boolean success = adminTimeOffService.rejectRequest(id, adminName);
         if (success) {
             return ResponseEntity.ok(Map.of("success", true, "message", "Antrag abgelehnt"));
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private String extractAdminName(String token) {
+        try {
+            if (token != null && token.startsWith("Bearer ")) {
+                String tokenValue = token.substring(7);
+                // JWT Token parsen
+                var claims = io.jsonwebtoken.Jwts.parser()
+                        .verifyWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(
+                                "hanno-admin-secret-key-for-production-2024".getBytes()))
+                        .build()
+                        .parseSignedClaims(tokenValue)
+                        .getPayload();
+
+                String fullName = claims.get("fullName", String.class);
+                if (fullName != null && !fullName.isEmpty()) {
+                    return fullName;
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return "Admin";
     }
 
     @PostMapping("/requests/{id}/cancel")

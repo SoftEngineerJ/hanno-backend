@@ -43,10 +43,11 @@ public class AdminTimeOffService {
     }
 
     @Transactional
-    public boolean approveRequest(Integer requestId) {
+    public boolean approveRequest(Integer requestId, String adminName) {
         return timeOffRequestRepository.findById(requestId)
                 .map(request -> {
                     request.setStatus("genehmigt");
+                    request.setApprovedBy(adminName);
                     request.setUpdatedAt(LocalDateTime.now());
                     timeOffRequestRepository.save(request);
                     return true;
@@ -55,10 +56,11 @@ public class AdminTimeOffService {
     }
 
     @Transactional
-    public boolean rejectRequest(Integer requestId) {
+    public boolean rejectRequest(Integer requestId, String adminName) {
         return timeOffRequestRepository.findById(requestId)
                 .map(request -> {
                     request.setStatus("abgelehnt");
+                    request.setApprovedBy(adminName);
                     request.setUpdatedAt(LocalDateTime.now());
                     timeOffRequestRepository.save(request);
                     return true;
@@ -114,6 +116,8 @@ public class AdminTimeOffService {
         dto.put("createdAt", request.getCreatedAt() != null ? request.getCreatedAt().toString() : "");
         dto.put("submittedAt", request.getCreatedAt() != null ? request.getCreatedAt().toString() : "");
         dto.put("updatedAt", request.getUpdatedAt() != null ? request.getUpdatedAt().toString() : "");
+        dto.put("approvedBy", request.getApprovedBy() != null ? request.getApprovedBy() : "");
+        dto.put("rejectionReason", request.getRejectionReason() != null ? request.getRejectionReason() : "");
         return dto;
     }
 }
