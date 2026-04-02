@@ -68,7 +68,7 @@ public class TimeOffService {
         result.put("genehmigt", new java.util.ArrayList<>());
         result.put("abgelehnt", new java.util.ArrayList<>());
         result.put("storniert", new java.util.ArrayList<>());
-        result.put("stornierung_ausstehend", new java.util.ArrayList<>());
+        result.put("stornierung_beantragt", new java.util.ArrayList<>());
 
         for (TimeOffRequest req : anfragen) {
             Map<String, Object> item = new HashMap<>();
@@ -194,10 +194,10 @@ public class TimeOffService {
         TimeOffRequest request = timeOffRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
-        // Wenn bereits genehmigt, dann Status = stornierung_ausstehend (wartet auf
+        // Wenn bereits genehmigt, dann Status = stornierung_beantragt (wartet auf
         // Bestätigung)
         if ("genehmigt".equalsIgnoreCase(request.getStatus())) {
-            request.setStatus("stornierung_ausstehend");
+            request.setStatus("stornierung_beantragt");
         } else {
             request.setStatus("storniert");
         }
