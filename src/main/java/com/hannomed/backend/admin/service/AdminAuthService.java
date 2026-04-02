@@ -25,7 +25,15 @@ public class AdminAuthService {
 
         Admin admin = adminOpt.get();
 
-        if (!passwordEncoder.matches(password, admin.getPassword())) {
+        // Support both BCrypt and plain text passwords
+        boolean passwordValid = false;
+        if (admin.getPassword().startsWith("$2")) {
+            passwordValid = passwordEncoder.matches(password, admin.getPassword());
+        } else {
+            passwordValid = admin.getPassword().equals(password);
+        }
+
+        if (!passwordValid) {
             throw new RuntimeException("Falsches Passwort");
         }
 
