@@ -56,11 +56,12 @@ public class AdminTimeOffService {
     }
 
     @Transactional
-    public boolean rejectRequest(Integer requestId, String adminName) {
+    public boolean rejectRequest(Integer requestId, String adminName, String rejectionReason) {
         return timeOffRequestRepository.findById(requestId)
                 .map(request -> {
                     request.setStatus("abgelehnt");
                     request.setApprovedBy(adminName);
+                    request.setRejectionReason(rejectionReason);
                     request.setUpdatedAt(LocalDateTime.now());
                     timeOffRequestRepository.save(request);
                     return true;

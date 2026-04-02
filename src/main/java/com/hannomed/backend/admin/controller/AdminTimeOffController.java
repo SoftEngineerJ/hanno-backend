@@ -54,9 +54,11 @@ public class AdminTimeOffController {
     @PostMapping("/requests/{id}/reject")
     public ResponseEntity<Map<String, Object>> rejectRequest(
             @PathVariable Integer id,
+            @RequestBody Map<String, String> body,
             @RequestHeader("Authorization") String token) {
         String adminName = extractAdminName(token);
-        boolean success = adminTimeOffService.rejectRequest(id, adminName);
+        String rejectionReason = body.get("reason");
+        boolean success = adminTimeOffService.rejectRequest(id, adminName, rejectionReason);
         if (success) {
             return ResponseEntity.ok(Map.of("success", true, "message", "Antrag abgelehnt"));
         }
