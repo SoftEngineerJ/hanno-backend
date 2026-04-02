@@ -194,6 +194,11 @@ public class TimeOffService {
         TimeOffRequest request = timeOffRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
+        // Abgelehnte Anträge können nicht storniert werden
+        if ("abgelehnt".equalsIgnoreCase(request.getStatus())) {
+            throw new RuntimeException("Abgelehnte Anträge können nicht storniert werden");
+        }
+
         // Wenn bereits genehmigt, dann Status = stornierung_beantragt (wartet auf
         // Bestätigung)
         if ("genehmigt".equalsIgnoreCase(request.getStatus())) {
