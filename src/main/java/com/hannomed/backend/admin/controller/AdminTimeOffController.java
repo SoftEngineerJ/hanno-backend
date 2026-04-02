@@ -95,6 +95,30 @@ public class AdminTimeOffController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/requests/{id}/confirm-cancellation")
+    public ResponseEntity<Map<String, Object>> confirmCancellation(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String token) {
+        String adminName = extractAdminName(token);
+        boolean success = adminTimeOffService.confirmCancellation(id, adminName);
+        if (success) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Stornierung bestätigt"));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/requests/{id}/reject-cancellation")
+    public ResponseEntity<Map<String, Object>> rejectCancellation(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String token) {
+        String adminName = extractAdminName(token);
+        boolean success = adminTimeOffService.rejectCancellation(id, adminName);
+        if (success) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Stornierung abgelehnt"));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/statistics")
     public ResponseEntity<Map<String, Object>> getStatistics() {
         return ResponseEntity.ok(adminTimeOffService.getStatistics());

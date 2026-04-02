@@ -80,6 +80,33 @@ public class AdminTimeOffService {
                 .orElse(false);
     }
 
+    @Transactional
+    public boolean confirmCancellation(Integer requestId, String adminName) {
+        return timeOffRequestRepository.findById(requestId)
+                .map(request -> {
+                    request.setStatus("storniert");
+                    request.setApprovedBy(adminName);
+                    request.setUpdatedAt(LocalDateTime.now());
+                    timeOffRequestRepository.save(request);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    @Transactional
+    public boolean rejectCancellation(Integer requestId, String adminName) {
+        return timeOffRequestRepository.findById(requestId)
+                .map(request -> {
+                    // Zurück auf genehmigt setzen
+                    request.setStatus("genehmigt");
+                    request.setApprovedBy(adminName);
+                    request.setUpdatedAt(LocalDateTime.now());
+                    timeOffRequestRepository.save(request);
+                    return true;
+                })
+                .orElse(false);
+    }
+
     public Map<String, Object> getRequestById(Integer id) {
         return timeOffRequestRepository.findById(id)
                 .map(this::mapToDto)
