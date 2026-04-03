@@ -89,6 +89,14 @@ public class AdminEmployeeService {
                         employee.setTourNumber(data.get("tourNumber"));
                     if (data.containsKey("standort"))
                         employee.setStandort(data.get("standort"));
+                    if (data.containsKey("vacationDays") && data.get("vacationDays") != null)
+                        employee.setVacationDays(Integer.parseInt(data.get("vacationDays")));
+                    if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null)
+                        employee.setUsedVacationDays(Integer.parseInt(data.get("usedVacationDays")));
+                    if (data.containsKey("specialVacation") && data.get("specialVacation") != null)
+                        employee.setSpecialVacation(Integer.parseInt(data.get("specialVacation")));
+                    if (data.containsKey("compensation") && data.get("compensation") != null)
+                        employee.setCompensation(Integer.parseInt(data.get("compensation")));
 
                     Employee saved = employeeRepository.save(employee);
                     return mapToDto(saved);
