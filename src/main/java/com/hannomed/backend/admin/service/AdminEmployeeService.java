@@ -38,7 +38,13 @@ public class AdminEmployeeService {
 
         String username = data.get("username");
         if (username == null || username.isEmpty()) {
-            username = data.get("email").split("@")[0];
+            String firstName = data.get("firstName");
+            if (firstName != null && !firstName.isEmpty()) {
+                username = firstName.toLowerCase().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace(" ",
+                        "");
+            } else {
+                username = data.get("email").split("@")[0];
+            }
         }
         employee.setUsername(username);
 
