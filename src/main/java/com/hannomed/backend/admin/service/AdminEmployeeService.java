@@ -2,6 +2,7 @@ package com.hannomed.backend.admin.service;
 
 import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.EmployeeRepository;
+import com.hannomed.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class AdminEmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final EmailService emailService;
 
     public List<Map<String, Object>> getAllEmployees() {
         return employeeRepository.findAll().stream()
@@ -31,8 +33,19 @@ public class AdminEmployeeService {
     public Map<String, Object> createEmployee(Map<String, String> data) {
         Employee employee = new Employee();
         employee.setEmail(data.get("email"));
-        employee.setUsername(data.get("username"));
-        employee.setPassword(data.get("password"));
+
+        String username = data.get("username");
+        if (username == null || username.isEmpty()) {
+            username = data.get("email").split("@")[0];
+        }
+        employee.setUsername(username);
+
+        String password = data.get("password");
+        if (password == null || password.isEmpty()) {
+            password = emailService.generatePassword();
+        }
+        employee.setPassword(password);
+
         employee.setFirstName(data.get("firstName"));
         employee.setLastName(data.get("lastName"));
         employee.setRole(data.get("role") != null ? data.get("role") : "employee");
@@ -76,6 +89,20 @@ public class AdminEmployeeService {
         }
 
         Employee saved = employeeRepository.save(employee);
+
+        // E-Mail mit Zugangsdaten senden
+        try {
+            emailService.sendWelcomeEmail(
+                    saved.getEmail(),
+                    saved.getFirstName(),
+                    saved.getLastName(),
+                    username,
+                    password);
+        } catch (Exception e) {
+            // E-Mail Fehler loggen aber nicht den Erfolg blockieren
+            System.err.println("Fehler beim Senden der Willkommens-E-Mail: " + e.getMessage());
+        }
+
         return mapToDto(saved);
     }
 
