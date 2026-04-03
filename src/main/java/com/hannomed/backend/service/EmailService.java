@@ -32,7 +32,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(email);
-            helper.setFrom("HannoMed App");
+            helper.setFrom("mazroo.develop@gmail.com");
             helper.setSubject("Willkommen bei HannoApp - Deine Zugangsdaten");
 
             String body = "Hallo " + firstName + " " + lastName + ",\n\n" +
@@ -61,7 +61,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(email);
-            helper.setFrom("HannoMed App");
+            helper.setFrom("mazroo.develop@gmail.com");
             helper.setSubject("Dein Passwort wurde geaendert - HannoApp");
 
             String body = "Hallo " + firstName + ",\n\n" +
