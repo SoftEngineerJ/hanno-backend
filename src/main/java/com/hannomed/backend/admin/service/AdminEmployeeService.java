@@ -4,6 +4,7 @@ import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.EmployeeRepository;
 import com.hannomed.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class AdminEmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public List<Map<String, Object>> getAllEmployees() {
         return employeeRepository.findAll().stream()
@@ -44,7 +46,7 @@ public class AdminEmployeeService {
         if (password == null || password.isEmpty()) {
             password = emailService.generatePassword();
         }
-        employee.setPassword(password);
+        employee.setPassword(passwordEncoder.encode(password));
 
         employee.setFirstName(data.get("firstName"));
         employee.setLastName(data.get("lastName"));
