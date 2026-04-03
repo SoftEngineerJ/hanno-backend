@@ -146,6 +146,7 @@ public class AdminEmployeeService {
         map.put("specialVacation", employee.getSpecialVacation() != null ? employee.getSpecialVacation() : 0);
         map.put("compensation", employee.getCompensation() != null ? employee.getCompensation() : 0);
         map.put("carriedOverDays", employee.getCarriedOverDays() != null ? employee.getCarriedOverDays() : 0);
+        map.put("deletedAt", employee.getDeletedAt() != null ? employee.getDeletedAt().toString() : null);
         return map;
     }
 }
