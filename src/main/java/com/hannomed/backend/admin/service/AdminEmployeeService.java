@@ -45,9 +45,24 @@ public class AdminEmployeeService {
         } else {
             employee.setVacationDays(30);
         }
-        employee.setUsedVacationDays(0);
-        employee.setSpecialVacation(0);
-        employee.setCompensation(0);
+
+        if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null) {
+            employee.setUsedVacationDays(Integer.parseInt(data.get("usedVacationDays")));
+        } else {
+            employee.setUsedVacationDays(0);
+        }
+
+        if (data.containsKey("specialVacation") && data.get("specialVacation") != null) {
+            employee.setSpecialVacation(Integer.parseInt(data.get("specialVacation")));
+        } else {
+            employee.setSpecialVacation(0);
+        }
+
+        if (data.containsKey("compensation") && data.get("compensation") != null) {
+            employee.setCompensation(Integer.parseInt(data.get("compensation")));
+        } else {
+            employee.setCompensation(0);
+        }
 
         Employee saved = employeeRepository.save(employee);
         return mapToDto(saved);
