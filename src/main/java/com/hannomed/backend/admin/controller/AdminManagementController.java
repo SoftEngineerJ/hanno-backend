@@ -35,7 +35,11 @@ public class AdminManagementController {
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateAdmin(@PathVariable Integer id,
             @RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(adminManagementService.updateAdmin(id, request));
+        try {
+            return ResponseEntity.ok(adminManagementService.updateAdmin(id, request));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
