@@ -64,6 +64,12 @@ public class AdminEmployeeService {
             employee.setCompensation(0);
         }
 
+        if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null) {
+            employee.setCarriedOverDays(Integer.parseInt(data.get("carriedOverDays")));
+        } else {
+            employee.setCarriedOverDays(0);
+        }
+
         Employee saved = employeeRepository.save(employee);
         return mapToDto(saved);
     }
@@ -97,6 +103,8 @@ public class AdminEmployeeService {
                         employee.setSpecialVacation(Integer.parseInt(data.get("specialVacation")));
                     if (data.containsKey("compensation") && data.get("compensation") != null)
                         employee.setCompensation(Integer.parseInt(data.get("compensation")));
+                    if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null)
+                        employee.setCarriedOverDays(Integer.parseInt(data.get("carriedOverDays")));
 
                     Employee saved = employeeRepository.save(employee);
                     return mapToDto(saved);

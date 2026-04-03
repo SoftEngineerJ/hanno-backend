@@ -57,4 +57,7 @@ public class Employee {
 
     @Column(name = "compensation")
     private Integer compensation;
+
+    @Column(name = "carried_over_days")
+    private Integer carriedOverDays;
 }
