@@ -2,7 +2,7 @@ package com.hannomed.backend.admin.service;
 
 import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.EmployeeRepository;
-import com.hannomed.backend.service.EmailService;
+import com.hannomed.backend.service.BrevoEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class AdminEmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final EmailService emailService;
+    private final BrevoEmailService brevoEmailService;
     private final PasswordEncoder passwordEncoder;
 
     public List<Map<String, Object>> getAllEmployees() {
@@ -44,7 +44,7 @@ public class AdminEmployeeService {
 
         String password = data.get("password");
         if (password == null || password.isEmpty()) {
-            password = emailService.generatePassword();
+            password = brevoEmailService.generatePassword();
         }
         employee.setPassword(passwordEncoder.encode(password));
 
@@ -94,7 +94,7 @@ public class AdminEmployeeService {
 
         // E-Mail mit Zugangsdaten senden
         try {
-            emailService.sendWelcomeEmail(
+            brevoEmailService.sendWelcomeEmail(
                     saved.getEmail(),
                     saved.getFirstName(),
                     saved.getLastName(),
