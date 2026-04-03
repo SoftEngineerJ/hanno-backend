@@ -40,31 +40,36 @@ public class AdminEmployeeService {
         employee.setTourNumber(data.get("tourNumber"));
         employee.setStandort(data.get("standort"));
 
-        if (data.containsKey("vacationDays") && data.get("vacationDays") != null) {
+        if (data.containsKey("vacationDays") && data.get("vacationDays") != null
+                && !data.get("vacationDays").isEmpty()) {
             employee.setVacationDays(Integer.parseInt(data.get("vacationDays")));
         } else {
             employee.setVacationDays(30);
         }
 
-        if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null) {
+        if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null
+                && !data.get("usedVacationDays").isEmpty()) {
             employee.setUsedVacationDays(Integer.parseInt(data.get("usedVacationDays")));
         } else {
             employee.setUsedVacationDays(0);
         }
 
-        if (data.containsKey("specialVacation") && data.get("specialVacation") != null) {
+        if (data.containsKey("specialVacation") && data.get("specialVacation") != null
+                && !data.get("specialVacation").isEmpty()) {
             employee.setSpecialVacation(Integer.parseInt(data.get("specialVacation")));
         } else {
             employee.setSpecialVacation(0);
         }
 
-        if (data.containsKey("compensation") && data.get("compensation") != null) {
+        if (data.containsKey("compensation") && data.get("compensation") != null
+                && !data.get("compensation").isEmpty()) {
             employee.setCompensation(Integer.parseInt(data.get("compensation")));
         } else {
             employee.setCompensation(0);
         }
 
-        if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null) {
+        if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null
+                && !data.get("carriedOverDays").isEmpty()) {
             employee.setCarriedOverDays(Integer.parseInt(data.get("carriedOverDays")));
         } else {
             employee.setCarriedOverDays(0);
