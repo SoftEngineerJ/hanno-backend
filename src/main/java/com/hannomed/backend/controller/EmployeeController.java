@@ -47,4 +47,15 @@ public class EmployeeController {
         authService.updateFcmToken(employeeId, fcmToken);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{employeeId}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Integer employeeId) {
+        return employeeRepository.findById(employeeId)
+                .map(employee -> {
+                    employee.setDeletedAt(java.time.LocalDateTime.now());
+                    employeeRepository.save(employee);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

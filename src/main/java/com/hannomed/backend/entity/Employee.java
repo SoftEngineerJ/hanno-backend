@@ -60,4 +60,7 @@ public class Employee {
 
     @Column(name = "carried_over_days")
     private Integer carriedOverDays;
+
+    @Column(name = "deleted_at")
+    private java.time.LocalDateTime deletedAt;
 }

@@ -30,6 +30,10 @@ public class AuthService {
 
         Employee employee = employeeOpt.get();
 
+        if (employee.getDeletedAt() != null) {
+            throw new RuntimeException("Account has been deleted");
+        }
+
         if (!passwordEncoder.matches(password, employee.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
