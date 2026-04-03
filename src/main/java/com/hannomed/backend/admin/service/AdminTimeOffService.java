@@ -27,6 +27,14 @@ public class AdminTimeOffService {
                 .orElse("Unbekannt");
     }
 
+    private void addHistory(TimeOffRequest request, String action, String adminName) {
+        String currentHistory = request.getHistory();
+        if (currentHistory == null)
+            currentHistory = "";
+        String entry = action + "|" + LocalDateTime.now().toString() + "|" + (adminName != null ? adminName : "") + ";";
+        request.setHistory(currentHistory + entry);
+    }
+
     public List<Map<String, Object>> getAllPendingRequests() {
         List<TimeOffRequest> requests = timeOffRequestRepository.findByStatusOrderByCreatedAtDesc("wartend");
         return requests.stream().map(this::mapToDto).toList();
@@ -49,6 +57,7 @@ public class AdminTimeOffService {
                     request.setStatus("genehmigt");
                     request.setApprovedBy(adminName);
                     request.setUpdatedAt(LocalDateTime.now());
+                    addHistory(request, "genehmigt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
                 })
@@ -63,6 +72,7 @@ public class AdminTimeOffService {
                     request.setApprovedBy(adminName);
                     request.setRejectionReason(rejectionReason);
                     request.setUpdatedAt(LocalDateTime.now());
+                    addHistory(request, "abgelehnt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
                 })
@@ -75,6 +85,7 @@ public class AdminTimeOffService {
                 .map(request -> {
                     request.setStatus("storniert");
                     request.setUpdatedAt(LocalDateTime.now());
+                    addHistory(request, "storniert", null);
                     timeOffRequestRepository.save(request);
                     return true;
                 })
@@ -88,6 +99,7 @@ public class AdminTimeOffService {
                     request.setStatus("storniert");
                     request.setApprovedBy(adminName);
                     request.setUpdatedAt(LocalDateTime.now());
+                    addHistory(request, "storniert", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
                 })
@@ -98,10 +110,10 @@ public class AdminTimeOffService {
     public boolean rejectCancellation(Integer requestId, String adminName) {
         return timeOffRequestRepository.findById(requestId)
                 .map(request -> {
-                    // Zurück auf genehmigt setzen
                     request.setStatus("genehmigt");
                     request.setApprovedBy(adminName);
                     request.setUpdatedAt(LocalDateTime.now());
+                    addHistory(request, "stornierung_abgelehnt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
                 })
@@ -112,11 +124,11 @@ public class AdminTimeOffService {
     public boolean resetStatus(Integer requestId, String adminName) {
         return timeOffRequestRepository.findById(requestId)
                 .map(request -> {
-                    // Zurück auf wartend setzen
                     request.setStatus("wartend");
                     request.setApprovedBy(adminName);
                     request.setRejectionReason(null);
                     request.setUpdatedAt(LocalDateTime.now());
+                    addHistory(request, "zurückgesetzt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
                 })
@@ -161,6 +173,7 @@ public class AdminTimeOffService {
         dto.put("updatedAt", request.getUpdatedAt() != null ? request.getUpdatedAt().toString() : "");
         dto.put("approvedBy", request.getApprovedBy() != null ? request.getApprovedBy() : "");
         dto.put("rejectionReason", request.getRejectionReason() != null ? request.getRejectionReason() : "");
+        dto.put("history", request.getHistory() != null ? request.getHistory() : "");
         return dto;
     }
 }

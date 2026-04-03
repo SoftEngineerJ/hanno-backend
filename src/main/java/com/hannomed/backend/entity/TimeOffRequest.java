@@ -44,10 +44,15 @@ public class TimeOffRequest {
     @Column(name = "rejection_reason")
     private String rejectionReason;
 
+    @Column(name = "history", columnDefinition = "TEXT")
+    private String history;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        // Initialen History-Eintrag erstellen
+        history = "eingereicht|" + createdAt.toString() + "|";
     }
 
     @PreUpdate
