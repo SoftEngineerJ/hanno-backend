@@ -1,23 +1,16 @@
 package com.hannomed.backend.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import sendinblue.ApiClient;
-import sendinblue.ApiException;
-import sendinblue.Configuration;
-import sendinblue.api.TransactionalEmailsApi;
-import sendinblue.model.SendSmtpEmail;
-import sendinblue.model.SendSmtpEmailSender;
-import sendinblue.model.SendSmtpEmailTo;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BrevoEmailService {
 
@@ -26,6 +19,7 @@ public class BrevoEmailService {
 
     private static final String CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
     private static final int PASSWORD_LENGTH = 12;
+    private static final String BREVO_API_URL = "https://api.sendinblue.com/v3/smtp/email";
 
     public String generatePassword() {
         SecureRandom random = new SecureRandom();
@@ -39,19 +33,6 @@ public class BrevoEmailService {
     public void sendWelcomeEmail(String email, String firstName, String lastName, String username, String password) {
         try {
             log.info("Brevo API - Attempting to send email to: {}", email);
-
-            ApiClient defaultClient = Configuration.getDefaultApiClient();
-            defaultClient.setApiKey(brevoApiKey);
-
-            TransactionalEmailsApi api = new TransactionalEmailsApi();
-            
-            SendSmtpEmailSender sender = new SendSmtpEmailSender();
-            sender.setEmail("mazroo.develop@gmail.com");
-            sender.setName("HannoApp");
-
-            SendSmtpEmailTo to = new SendSmtpEmailTo();
-            to.setEmail(email);
-            to.setName(firstName + " " + lastName);
 
             String subject = "Willkommen bei HannoApp - Deine Zugangsdaten";
             String htmlContent = "<html><body>" +
@@ -70,18 +51,9 @@ public class BrevoEmailService {
                     "<p>Viele Grüße,<br>Dein HannoApp Team</p>" +
                     "</body></html>";
 
-            SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
-            sendSmtpEmail.setSender(sender);
-            sendSmtpEmail.setTo(Collections.singletonList(to));
-            sendSmtpEmail.setSubject(subject);
-            sendSmtpEmail.setHtmlContent(htmlContent);
-
-            api.sendTransacEmail(sendSmtpEmail);
+            sendEmail(email, firstName + " " + lastName, subject, htmlContent);
             log.info("Brevo API - Email sent successfully to: {}", email);
 
-        } catch (ApiException e) {
-            log.error("Brevo API - ApiException: {} | Response: {}", e.getMessage(), e.getResponseBody());
-            throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Brevo API - Exception: {} | Cause: {}", e.getMessage(), e.getCause());
             throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
@@ -92,42 +64,46 @@ public class BrevoEmailService {
         try {
             log.info("Brevo API - Sending password change email to: {}", email);
 
-            ApiClient defaultClient = Configuration.getDefaultApiClient();
-            defaultClient.setApiKey(brevoApiKey);
-
-            TransactionalEmailsApi api = new TransactionalEmailsApi();
-            
-            SendSmtpEmailSender sender = new SendSmtpEmailSender();
-            sender.setEmail("mazroo.develop@gmail.com");
-            sender.setName("HannoApp");
-
-            SendSmtpEmailTo to = new SendSmtpEmailTo();
-            to.setEmail(email);
-            to.setName(firstName);
-
             String subject = "Dein Passwort wurde geändert - HannoApp";
             String htmlContent = "<html><body>" +
                     "<p>Hallo " + firstName + ",</p>" +
                     "<p>Dein Passwort wurde erfolgreich geändert.</p>" +
-                    "<p>Wenn Du diese Änderung nicht selbst vorgenommen hast, wende Dich bitte umgehend an Deinen Administrator.</p>" +
+                    "<p>Wenn Du diese Änderung nicht selbst vorgenommen hast, wende Dich bitte umgehend an Deinen Administrator.</p>"
+                    +
                     "<p>Viele Grüße,<br>Dein HannoApp Team</p>" +
                     "</body></html>";
 
-            SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
-            sendSmtpEmail.setSender(sender);
-            sendSmtpEmail.setTo(Collections.singletonList(to));
-            sendSmtpEmail.setSubject(subject);
-            sendSmtpEmail.setHtmlContent(htmlContent);
-
-            api.sendTransacEmail(sendSmtpEmail);
+            sendEmail(email, firstName, subject, htmlContent);
             log.info("Brevo API - Password change email sent successfully to: {}", email);
 
-        } catch (ApiException e) {
-            log.error("Brevo API - ApiException: {} | Response: {}", e.getMessage(), e.getResponseBody());
-            throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Brevo API - Exception: {} | Cause: {}", e.getMessage(), e.getCause());
             throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
+        }
+    }
+
+    private void sendEmail(String toEmail, String toName, String subject, String htmlContent) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", brevoApiKey);
+
+        Map<String, Object> emailData = Map.of(
+                "sender", Map.of("email", "mazroo.develop@gmail.com", "name", "HannoApp"),
+                "to", List.of(Map.of("email", toEmail, "name", toName)),
+                "subject", subject,
+                "htmlContent", htmlContent);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(emailData, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                BREVO_API_URL,
+                request,
+                String.class);
+
+        if (response.getStatusCode() != HttpStatus.CREATED && response.getStatusCode() != HttpStatus.OK) {
+            throw new RuntimeException("Brevo API error: " + response.getBody());
         }
     }
 }
