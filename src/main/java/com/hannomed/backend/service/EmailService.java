@@ -32,18 +32,19 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(email);
-            helper.setFrom("mazroo.develop@gmail.com");
             helper.setSubject("Willkommen bei HannoApp - Deine Zugangsdaten");
 
             String body = "Hallo " + firstName + " " + lastName + ",\n\n" +
-                    "herzlich willkommen bei HannoApp!\n\n" +
-                    "Deine Zugangsdaten fuer die App:\n\n" +
+                    "wir freuen uns, Dir unsere neue HannoApp vorstellen zu duerfen!\n\n" +
+                    "HannoApp ist unsere interne Mitarbeiter-App fuer Urlaubsantraege, " +
+                    "Freizeitausgleich und mehr. Hier kannst Du bequem Antrraege stellen " +
+                    "und den Status verfolgen.\n\n" +
+                    "Deine Zugangsdaten:\n" +
                     "Benutzername: " + username + "\n" +
                     "Passwort: " + password + "\n\n" +
                     "Bitte aendere Dein Passwort nach dem ersten Login.\n\n" +
-                    "Die App kannst Du hier herunterladen:\n" +
-                    "- Android: Google Play Store (Suche nach HannoApp)\n" +
-                    "- iOS: Apple App Store (Suche nach HannoApp)\n\n" +
+                    "App herunterladen:\n" +
+                    "https://hannomed.vercel.app\n\n" +
                     "Bei Fragen wende Dich an Deinen Administrator.\n\n" +
                     "Viele Gruesse,\n" +
                     "Dein HannoApp Team";
@@ -61,7 +62,6 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(email);
-            helper.setFrom("mazroo.develop@gmail.com");
             helper.setSubject("Dein Passwort wurde geaendert - HannoApp");
 
             String body = "Hallo " + firstName + ",\n\n" +
