@@ -3,6 +3,7 @@ package com.hannomed.backend.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.security.SecureRandom;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
     private final JavaMailSender mailSender;
@@ -28,6 +30,8 @@ public class EmailService {
 
     public void sendWelcomeEmail(String email, String firstName, String lastName, String username, String password) {
         try {
+            log.info("SMTP Debug - Attempting to send email to: {}", email);
+
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -50,8 +54,14 @@ public class EmailService {
                     "Dein HannoApp Team";
 
             helper.setText(body, false);
+            log.info("SMTP Debug - Sending message...");
             mailSender.send(message);
+            log.info("SMTP Debug - Email sent successfully to: {}", email);
         } catch (MessagingException e) {
+            log.error("SMTP Debug - MessagingException: {} | Cause: {}", e.getMessage(), e.getCause());
+            throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("SMTP Debug - Exception: {} | Cause: {}", e.getMessage(), e.getCause());
             throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
         }
     }
