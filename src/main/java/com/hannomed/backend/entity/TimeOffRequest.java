@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "time_off_requests")
@@ -49,14 +50,14 @@ public class TimeOffRequest {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        // Initialen History-Eintrag erstellen
-        history = "eingereicht|" + createdAt.toString() + "|";
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Berlin"));
+        createdAt = now;
+        updatedAt = now;
+        history = "eingereicht|" + now.toString() + "|";
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now(ZoneId.of("Europe/Berlin"));
     }
 }

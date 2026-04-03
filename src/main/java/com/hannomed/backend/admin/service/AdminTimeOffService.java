@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,8 @@ public class AdminTimeOffService {
         String currentHistory = request.getHistory();
         if (currentHistory == null)
             currentHistory = "";
-        String entry = action + "|" + LocalDateTime.now().toString() + "|" + (adminName != null ? adminName : "") + ";";
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Berlin"));
+        String entry = action + "|" + now.toString() + "|" + (adminName != null ? adminName : "") + ";";
         request.setHistory(currentHistory + entry);
     }
 
@@ -56,7 +58,7 @@ public class AdminTimeOffService {
                 .map(request -> {
                     request.setStatus("genehmigt");
                     request.setApprovedBy(adminName);
-                    request.setUpdatedAt(LocalDateTime.now());
+                    request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "genehmigt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
@@ -71,7 +73,7 @@ public class AdminTimeOffService {
                     request.setStatus("abgelehnt");
                     request.setApprovedBy(adminName);
                     request.setRejectionReason(rejectionReason);
-                    request.setUpdatedAt(LocalDateTime.now());
+                    request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "abgelehnt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
@@ -84,7 +86,7 @@ public class AdminTimeOffService {
         return timeOffRequestRepository.findById(requestId)
                 .map(request -> {
                     request.setStatus("storniert");
-                    request.setUpdatedAt(LocalDateTime.now());
+                    request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "storniert", null);
                     timeOffRequestRepository.save(request);
                     return true;
@@ -98,7 +100,7 @@ public class AdminTimeOffService {
                 .map(request -> {
                     request.setStatus("storniert");
                     request.setApprovedBy(adminName);
-                    request.setUpdatedAt(LocalDateTime.now());
+                    request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "storniert", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
@@ -112,7 +114,7 @@ public class AdminTimeOffService {
                 .map(request -> {
                     request.setStatus("genehmigt");
                     request.setApprovedBy(adminName);
-                    request.setUpdatedAt(LocalDateTime.now());
+                    request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "stornierung_abgelehnt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
@@ -127,7 +129,7 @@ public class AdminTimeOffService {
                     request.setStatus("wartend");
                     request.setApprovedBy(adminName);
                     request.setRejectionReason(null);
-                    request.setUpdatedAt(LocalDateTime.now());
+                    request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "zurückgesetzt", adminName);
                     timeOffRequestRepository.save(request);
                     return true;
