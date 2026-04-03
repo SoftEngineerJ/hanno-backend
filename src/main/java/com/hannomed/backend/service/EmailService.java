@@ -28,29 +28,20 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setFrom("HannoMed App");
-        message.setSubject("Willkommen bei HannoApp - Ihre Zugangsdaten");
+        message.setSubject("Willkommen bei HannoApp - Deine Zugangsdaten");
 
-        String body = """
-                Hallo %s %s,
-
-                herzlich willkommen bei HannoApp!
-
-                Ihre Zugangsdaten für die App:
-
-                Benutzername: %s
-                Passwort: %s
-
-                Bitte ändern Sie Ihr Passwort nach dem ersten Login.
-
-                Die App können Sie hier herunterladen:
-                - Android: Google Play Store (Suche nach "HannoApp")
-                - iOS: Apple App Store (Suche nach "HannoApp")
-
-                Bei Fragen wenden Sie sich an Ihren Administrator.
-
-                Viele Grüße,
-                Ihr HannoApp Team
-                """.formatted(firstName, lastName, username, password);
+        String body = "Hallo " + firstName + " " + lastName + ",\n\n" +
+                "herzlich willkommen bei HannoApp!\n\n" +
+                "Deine Zugangsdaten fuer die App:\n\n" +
+                "Benutzername: " + username + "\n" +
+                "Passwort: " + password + "\n\n" +
+                "Bitte aendere Dein Passwort nach dem ersten Login.\n\n" +
+                "Die App kannst Du hier herunterladen:\n" +
+                "- Android: Google Play Store (Suche nach HannoApp)\n" +
+                "- iOS: Apple App Store (Suche nach HannoApp)\n\n" +
+                "Bei Fragen wende Dich an Deinen Administrator.\n\n" +
+                "Viele Gruesse,\n" +
+                "Dein HannoApp Team";
 
         message.setText(body);
         mailSender.send(message);
@@ -60,19 +51,14 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setFrom("HannoMed App");
-        message.setSubject("Ihr Passwort wurde geändert - HannoApp");
+        message.setSubject("Dein Passwort wurde geaendert - HannoApp");
 
-        String body = """
-                Hallo %s,
-
-                Ihr Passwort wurde erfolgreich geändert.
-
-                Wenn Sie diese Änderung nicht selbst vorgenommen haben, wenden Sie sich bitte umgehend an Ihren Administrator.
-
-                Viele Grüße,
-                Ihr HannoApp Team
-                """
-                .formatted(firstName);
+        String body = "Hallo " + firstName + ",\n\n" +
+                "Dein Passwort wurde erfolgreich geaendert.\n\n" +
+                "Wenn Du diese Aenderung nicht selbst vorgenommen hast, wende Dich bitte umgehend an Deinen Administrator.\n\n"
+                +
+                "Viele Gruesse,\n" +
+                "Dein HannoApp Team";
 
         message.setText(body);
         mailSender.send(message);
