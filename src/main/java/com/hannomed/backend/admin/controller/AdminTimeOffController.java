@@ -65,6 +65,18 @@ public class AdminTimeOffController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/requests/{id}/reset")
+    public ResponseEntity<Map<String, Object>> resetRequest(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String token) {
+        String adminName = extractAdminName(token);
+        boolean success = adminTimeOffService.resetStatus(id, adminName);
+        if (success) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Status zurückgesetzt"));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     private String extractAdminName(String token) {
         try {
             if (token != null && token.startsWith("Bearer ")) {

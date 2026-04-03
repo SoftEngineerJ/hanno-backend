@@ -108,6 +108,21 @@ public class AdminTimeOffService {
                 .orElse(false);
     }
 
+    @Transactional
+    public boolean resetStatus(Integer requestId, String adminName) {
+        return timeOffRequestRepository.findById(requestId)
+                .map(request -> {
+                    // Zurück auf wartend setzen
+                    request.setStatus("wartend");
+                    request.setApprovedBy(adminName);
+                    request.setRejectionReason(null);
+                    request.setUpdatedAt(LocalDateTime.now());
+                    timeOffRequestRepository.save(request);
+                    return true;
+                })
+                .orElse(false);
+    }
+
     public Map<String, Object> getRequestById(Integer id) {
         return timeOffRequestRepository.findById(id)
                 .map(this::mapToDto)
