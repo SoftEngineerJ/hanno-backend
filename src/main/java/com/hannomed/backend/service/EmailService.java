@@ -1,8 +1,10 @@
 package com.hannomed.backend.service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -25,42 +27,54 @@ public class EmailService {
     }
 
     public void sendWelcomeEmail(String email, String firstName, String lastName, String username, String password) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setFrom("HannoMed App");
-        message.setSubject("Willkommen bei HannoApp - Deine Zugangsdaten");
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        String body = "Hallo " + firstName + " " + lastName + ",\n\n" +
-                "herzlich willkommen bei HannoApp!\n\n" +
-                "Deine Zugangsdaten fuer die App:\n\n" +
-                "Benutzername: " + username + "\n" +
-                "Passwort: " + password + "\n\n" +
-                "Bitte aendere Dein Passwort nach dem ersten Login.\n\n" +
-                "Die App kannst Du hier herunterladen:\n" +
-                "- Android: Google Play Store (Suche nach HannoApp)\n" +
-                "- iOS: Apple App Store (Suche nach HannoApp)\n\n" +
-                "Bei Fragen wende Dich an Deinen Administrator.\n\n" +
-                "Viele Gruesse,\n" +
-                "Dein HannoApp Team";
+            helper.setTo(email);
+            helper.setFrom("HannoMed App");
+            helper.setSubject("Willkommen bei HannoApp - Deine Zugangsdaten");
 
-        message.setText(body);
-        mailSender.send(message);
+            String body = "Hallo " + firstName + " " + lastName + ",\n\n" +
+                    "herzlich willkommen bei HannoApp!\n\n" +
+                    "Deine Zugangsdaten fuer die App:\n\n" +
+                    "Benutzername: " + username + "\n" +
+                    "Passwort: " + password + "\n\n" +
+                    "Bitte aendere Dein Passwort nach dem ersten Login.\n\n" +
+                    "Die App kannst Du hier herunterladen:\n" +
+                    "- Android: Google Play Store (Suche nach HannoApp)\n" +
+                    "- iOS: Apple App Store (Suche nach HannoApp)\n\n" +
+                    "Bei Fragen wende Dich an Deinen Administrator.\n\n" +
+                    "Viele Gruesse,\n" +
+                    "Dein HannoApp Team";
+
+            helper.setText(body, false);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
+        }
     }
 
     public void sendPasswordChangedEmail(String email, String firstName) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setFrom("HannoMed App");
-        message.setSubject("Dein Passwort wurde geaendert - HannoApp");
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        String body = "Hallo " + firstName + ",\n\n" +
-                "Dein Passwort wurde erfolgreich geaendert.\n\n" +
-                "Wenn Du diese Aenderung nicht selbst vorgenommen hast, wende Dich bitte umgehend an Deinen Administrator.\n\n"
-                +
-                "Viele Gruesse,\n" +
-                "Dein HannoApp Team";
+            helper.setTo(email);
+            helper.setFrom("HannoMed App");
+            helper.setSubject("Dein Passwort wurde geaendert - HannoApp");
 
-        message.setText(body);
-        mailSender.send(message);
+            String body = "Hallo " + firstName + ",\n\n" +
+                    "Dein Passwort wurde erfolgreich geaendert.\n\n" +
+                    "Wenn Du diese Aenderung nicht selbst vorgenommen hast, wende Dich bitte umgehend an Deinen Administrator.\n\n"
+                    +
+                    "Viele Gruesse,\n" +
+                    "Dein HannoApp Team";
+
+            helper.setText(body, false);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
+        }
     }
 }
