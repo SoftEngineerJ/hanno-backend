@@ -45,4 +45,16 @@ public class Employee {
     private String tourNumber;
 
     private String standort;
+
+    @Column(name = "vacation_days")
+    private Integer vacationDays;
+
+    @Column(name = "used_vacation_days")
+    private Integer usedVacationDays;
+
+    @Column(name = "special_vacation")
+    private Integer specialVacation;
+
+    @Column(name = "compensation")
+    private Integer compensation;
 }
