@@ -36,7 +36,7 @@ public class AdminEmployeeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateEmployee(
-            @PathVariable Integer id, 
+            @PathVariable Integer id,
             @RequestBody Map<String, String> data) {
         Map<String, Object> employee = adminEmployeeService.updateEmployee(id, data);
         if (employee == null) {
@@ -47,11 +47,15 @@ public class AdminEmployeeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteEmployee(@PathVariable Integer id) {
-        boolean deleted = adminEmployeeService.deleteEmployee(id);
-        if (deleted) {
-            return ResponseEntity.ok(Map.of("success", true, "message", "Mitarbeiter gelöscht"));
+        try {
+            boolean deleted = adminEmployeeService.deleteEmployee(id);
+            if (deleted) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Mitarbeiter gelöscht"));
+            }
+            return ResponseEntity.status(404).body(Map.of("success", false, "error", "Mitarbeiter nicht gefunden"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
         }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/count")
