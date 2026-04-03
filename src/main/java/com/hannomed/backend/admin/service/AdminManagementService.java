@@ -60,9 +60,22 @@ public class AdminManagementService {
         if (request.containsKey("email")) {
             admin.setEmail(request.get("email"));
         }
-        if (request.containsKey("password") && !request.get("password").isEmpty()) {
+
+        // Passwort ändern mit Verifikation
+        if (request.containsKey("currentPassword") && request.containsKey("newPassword")) {
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+
+            if (!currentPassword.isEmpty() && !newPassword.isEmpty()) {
+                if (!passwordEncoder.matches(currentPassword, admin.getPassword())) {
+                    throw new RuntimeException("Aktuelles Passwort ist falsch");
+                }
+                admin.setPassword(passwordEncoder.encode(newPassword));
+            }
+        } else if (request.containsKey("password") && !request.get("password").isEmpty()) {
             admin.setPassword(passwordEncoder.encode(request.get("password")));
         }
+
         if (request.containsKey("firstName")) {
             admin.setFirstName(request.get("firstName"));
         }
