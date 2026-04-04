@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -49,22 +51,33 @@ public class PushNotificationService {
     @PostConstruct
     public void init() {
         try {
-            if (FirebaseApp.getApps().isEmpty()
-                    && projectId != null && !projectId.isEmpty()
-                    && privateKey != null && !privateKey.isEmpty()
-                    && clientEmail != null && !clientEmail.isEmpty()) {
+            if (FirebaseApp.getApps().isEmpty()) {
+                String credentialsPath = System.getenv().getOrDefault("FIREBASE_CREDENTIALS_FILE",
+                        "/etc/secrets/firebase-credentials.json");
 
-                String json = String.format(
-                        "{\"type\":\"service_account\",\"project_id\":\"%s\",\"private_key_id\":\"%s\",\"private_key\":\"%s\",\"client_email\":\"%s\",\"client_id\":\"%s\",\"auth_uri\":\"%s\",\"token_uri\":\"%s\",\"auth_provider_x509_cert_url\":\"%s\",\"client_x509_cert_url\":\"%s\",\"universe_domain\":\"googleapis.com\"}",
-                        projectId,
-                        privateKeyId,
-                        privateKey.replace("\n", "\\n"),
-                        clientEmail,
-                        clientId,
-                        authUri,
-                        tokenUri,
-                        authProviderCertUrl,
-                        clientCertUrl);
+                String json;
+                if (Files.exists(Paths.get(credentialsPath))) {
+                    json = Files.readString(Paths.get(credentialsPath));
+                    log.info("Firebase credentials loaded from file: {}", credentialsPath);
+                } else {
+                    log.warn("Firebase credentials file not found at: {}, falling back to env vars", credentialsPath);
+                    if (projectId == null || projectId.isEmpty() || privateKey == null
+                            || privateKey.isEmpty() || clientEmail == null || clientEmail.isEmpty()) {
+                        log.error("Firebase credentials not configured");
+                        return;
+                    }
+                    json = String.format(
+                            "{\"type\":\"service_account\",\"project_id\":\"%s\",\"private_key_id\":\"%s\",\"private_key\":\"%s\",\"client_email\":\"%s\",\"client_id\":\"%s\",\"auth_uri\":\"%s\",\"token_uri\":\"%s\",\"auth_provider_x509_cert_url\":\"%s\",\"client_x509_cert_url\":\"%s\",\"universe_domain\":\"googleapis.com\"}",
+                            projectId,
+                            privateKeyId,
+                            privateKey.replace("\n", "\\n"),
+                            clientEmail,
+                            clientId,
+                            authUri,
+                            tokenUri,
+                            authProviderCertUrl,
+                            clientCertUrl);
+                }
 
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(
