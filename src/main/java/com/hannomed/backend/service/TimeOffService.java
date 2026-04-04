@@ -232,7 +232,7 @@ public class TimeOffService {
             String employeeName = employeeRepository.findById(request.getEmployeeId())
                     .map(e -> e.getFirstName() + " " + e.getLastName())
                     .orElse("Unbekannt");
-            EventController.broadcastCancellationRequest(employeeName, request.getType());
+            EventController.broadcastRequestCancelled(employeeName, request.getType());
         }
         timeOffRequestRepository.save(request);
     }

@@ -45,6 +45,20 @@ public class EventController {
         }
     }
 
+    public static void broadcastRequestCancelled(String employeeName, String type) {
+        String data = String.format("{\"type\":\"request_cancelled\",\"employeeName\":\"%s\",\"requestType\":\"%s\"}",
+                employeeName, type);
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("request-cancelled")
+                        .data(data));
+            } catch (IOException e) {
+                emitters.remove(emitter);
+            }
+        }
+    }
+
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> streamEvents() {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
