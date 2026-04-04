@@ -220,6 +220,12 @@ public class TimeOffService {
         // Bestätigung)
         if ("genehmigt".equalsIgnoreCase(request.getStatus())) {
             request.setStatus("stornierung_beantragt");
+
+            // Broadcast cancellation request to admin
+            String employeeName = employeeRepository.findById(request.getEmployeeId())
+                    .map(e -> e.getFirstName() + " " + e.getLastName())
+                    .orElse("Unbekannt");
+            EventController.broadcastCancellationRequest(employeeName, request.getType());
         } else {
             request.setStatus("storniert");
         }

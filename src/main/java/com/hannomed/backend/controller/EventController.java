@@ -17,8 +17,6 @@ public class EventController {
     private static final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
     public static void broadcastNewRequest(String employeeName, String type) {
-        System.out.println(">>> EventController.broadcastNewRequest called: " + employeeName + " type: " + type);
-        System.out.println(">>> Active emitters: " + emitters.size());
         String data = String.format("{\"type\":\"new_request\",\"employeeName\":\"%s\",\"requestType\":\"%s\"}",
                 employeeName, type);
         for (SseEmitter emitter : emitters) {
@@ -26,9 +24,22 @@ public class EventController {
                 emitter.send(SseEmitter.event()
                         .name("new-request")
                         .data(data));
-                System.out.println(">>> Sent to emitter");
             } catch (IOException e) {
-                System.out.println(">>> Error sending to emitter: " + e.getMessage());
+                emitters.remove(emitter);
+            }
+        }
+    }
+
+    public static void broadcastCancellationRequest(String employeeName, String type) {
+        String data = String.format(
+                "{\"type\":\"cancellation_request\",\"employeeName\":\"%s\",\"requestType\":\"%s\"}",
+                employeeName, type);
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("cancellation-request")
+                        .data(data));
+            } catch (IOException e) {
                 emitters.remove(emitter);
             }
         }
