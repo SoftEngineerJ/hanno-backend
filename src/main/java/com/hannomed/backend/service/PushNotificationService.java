@@ -112,6 +112,9 @@ public class PushNotificationService {
             log.info("Push notification sent successfully: {}", response);
         } catch (InterruptedException | ExecutionException e) {
             log.error("Failed to send push notification: {}", e.getMessage());
+            if (e.getCause() != null) {
+                log.error("Caused by: {}", e.getCause().getMessage());
+            }
         }
     }
 
