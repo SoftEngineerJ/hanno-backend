@@ -1,9 +1,9 @@
 package com.hannomed.backend.admin.service;
 
 import com.hannomed.backend.entity.TimeOffRequest;
-import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.TimeOffRequestRepository;
 import com.hannomed.backend.repository.EmployeeRepository;
+import com.hannomed.backend.service.PushNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +19,7 @@ public class AdminTimeOffService {
 
     private final TimeOffRequestRepository timeOffRequestRepository;
     private final EmployeeRepository employeeRepository;
+    private final PushNotificationService pushNotificationService;
 
     private String getEmployeeName(Integer employeeId) {
         if (employeeId == null)
@@ -35,6 +36,20 @@ public class AdminTimeOffService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Berlin"));
         String entry = action + "|" + now.toString() + "|" + (adminName != null ? adminName : "") + ";";
         request.setHistory(currentHistory + entry);
+    }
+
+    private void sendPushNotification(Integer employeeId, String status, String type) {
+        if (employeeId == null)
+            return;
+
+        employeeRepository.findById(employeeId).ifPresent(employee -> {
+            String fcmToken = employee.getFcmToken();
+            if (fcmToken != null && !fcmToken.isEmpty()) {
+                String employeeName = employee.getFirstName();
+                pushNotificationService.sendRequestStatusNotification(fcmToken, employeeName, status,
+                        type != null ? type : "Antrag");
+            }
+        });
     }
 
     public List<Map<String, Object>> getAllPendingRequests() {
@@ -61,6 +76,9 @@ public class AdminTimeOffService {
                     request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "genehmigt", adminName);
                     timeOffRequestRepository.save(request);
+
+                    sendPushNotification(request.getEmployeeId(), "genehmigt", request.getType());
+
                     return true;
                 })
                 .orElse(false);
@@ -76,6 +94,9 @@ public class AdminTimeOffService {
                     request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "abgelehnt", adminName);
                     timeOffRequestRepository.save(request);
+
+                    sendPushNotification(request.getEmployeeId(), "abgelehnt", request.getType());
+
                     return true;
                 })
                 .orElse(false);
