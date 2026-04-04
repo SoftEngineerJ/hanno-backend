@@ -8,25 +8,28 @@ import com.google.firebase.messaging.Notification;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
 public class PushNotificationService {
 
-    @Value("${firebase.credentials.path:}")
-    private String credentialsPath;
+    @Value("${firebase.credentials.json:}")
+    private String firebaseCredentialsJson;
 
     @PostConstruct
     public void init() {
         try {
-            if (FirebaseApp.getApps().isEmpty() && credentialsPath != null && !credentialsPath.isEmpty()) {
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(credentialsPath).getInputStream()))
+            if (FirebaseApp.getApps().isEmpty() && firebaseCredentialsJson != null && !firebaseCredentialsJson.isEmpty()) {
+                FirebaseOptions options 
+                                = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(
+                            new ByteArrayInputStream(firebaseCredentialsJson.getBytes(StandardCharsets.UTF_8))))
                         .build();
                 FirebaseApp.initializeApp(options);
                 log.info("Firebase Admin SDK initialized successfully");
