@@ -58,6 +58,28 @@ public class AdminEmployeeController {
         }
     }
 
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Map<String, Object>> updatePassword(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> data) {
+        try {
+            String currentPassword = data.get("currentPassword");
+            String newPassword = data.get("newPassword");
+
+            if (currentPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Passwörter erforderlich"));
+            }
+
+            boolean updated = adminEmployeeService.updatePassword(id, currentPassword, newPassword);
+            if (updated) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Passwort geändert"));
+            }
+            return ResponseEntity.status(400).body(Map.of("success", false, "error", "Aktuelles Passwort ist falsch"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/count")
     public ResponseEntity<Map<String, Object>> getEmployeeCount() {
         return ResponseEntity.ok(Map.of("count", adminEmployeeService.getEmployeeCount()));

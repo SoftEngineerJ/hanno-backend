@@ -164,6 +164,19 @@ public class AdminEmployeeService {
         return employeeRepository.count();
     }
 
+    public boolean updatePassword(Integer id, String currentPassword, String newPassword) {
+        return employeeRepository.findById(id)
+                .map(employee -> {
+                    if (!passwordEncoder.matches(currentPassword, employee.getPassword())) {
+                        return false;
+                    }
+                    employee.setPassword(passwordEncoder.encode(newPassword));
+                    employeeRepository.save(employee);
+                    return true;
+                })
+                .orElse(false);
+    }
+
     private Map<String, Object> mapToDto(Employee employee) {
         Map<String, Object> map = new HashMap<>();
         map.put("id", employee.getId());
