@@ -141,6 +141,11 @@
     <artifactId>firebase-admin</artifactId>
     <version>9.4.2</version>
 </dependency>
+<dependency>
+    <groupId>com.google.auth</groupId>
+    <artifactId>google-auth-library-oauth2-http</artifactId>
+    <version>1.28.0</version>
+</dependency>
 	</dependencies>
 
 	<build>
