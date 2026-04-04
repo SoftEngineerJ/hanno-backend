@@ -227,7 +227,12 @@ public class TimeOffService {
                     .orElse("Unbekannt");
             EventController.broadcastCancellationRequest(employeeName, request.getType());
         } else {
+            // For wartend status, directly cancel and notify admin
             request.setStatus("storniert");
+            String employeeName = employeeRepository.findById(request.getEmployeeId())
+                    .map(e -> e.getFirstName() + " " + e.getLastName())
+                    .orElse("Unbekannt");
+            EventController.broadcastCancellationRequest(employeeName, request.getType());
         }
         timeOffRequestRepository.save(request);
     }
