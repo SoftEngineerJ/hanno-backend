@@ -1,5 +1,6 @@
 package com.hannomed.backend.service;
 
+import com.hannomed.backend.controller.EventController;
 import com.hannomed.backend.entity.TimeOffRequest;
 import com.hannomed.backend.repository.TimeOffRequestRepository;
 import com.hannomed.backend.repository.EmployeeRepository;
@@ -197,6 +198,12 @@ public class TimeOffService {
         request.setStatus("wartend");
 
         timeOffRequestRepository.save(request);
+
+        // Broadcast to admin via SSE
+        String employeeName = employeeRepository.findById(request.getEmployeeId())
+                .map(e -> e.getFirstName() + " " + e.getLastName())
+                .orElse("Unbekannt");
+        EventController.broadcastNewRequest(employeeName, request.getType());
     }
 
     public void cancelTimeOff(Integer id) {
