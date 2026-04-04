@@ -19,20 +19,56 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class PushNotificationService {
 
-    @Value("${firebase.credentials.json:}")
-    private String firebaseCredentialsJson;
+    @Value("${firebase.project.id:}")
+    private String projectId;
+
+    @Value("${firebase.private.key.id:}")
+    private String privateKeyId;
+
+    @Value("${firebase.private.key:}")
+    private String privateKey;
+
+    @Value("${firebase.client.email:}")
+    private String clientEmail;
+
+    @Value("${firebase.client.id:}")
+    private String clientId;
+
+    @Value("${firebase.auth.uri:https://accounts.google.com/o/oauth2/auth}")
+    private String authUri;
+
+    @Value("${firebase.token.uri:https://oauth2.googleapis.com/token}")
+    private String tokenUri;
+
+    @Value("${firebase.auth.provider.x509.cert.url:https://www.googleapis.com/oauth2/v1/certs}")
+    private String authProviderCertUrl;
+
+    @Value("${firebase.client.x509.cert.url:}")
+    private String clientCertUrl;
 
     @PostConstruct
     public void init() {
         try {
-            if (FirebaseApp.getApps().isEmpty() && firebaseCredentialsJson != null
-                    && !firebaseCredentialsJson.isEmpty()) {
-                // Fix: \n in private_key korrekt ersetzen
-                String fixedJson = firebaseCredentialsJson.replace("\\n", "\n");
+            if (FirebaseApp.getApps().isEmpty()
+                    && projectId != null && !projectId.isEmpty()
+                    && privateKey != null && !privateKey.isEmpty()
+                    && clientEmail != null && !clientEmail.isEmpty()) {
+
+                String json = String.format(
+                        "{\"type\":\"service_account\",\"project_id\":\"%s\",\"private_key_id\":\"%s\",\"private_key\":\"%s\",\"client_email\":\"%s\",\"client_id\":\"%s\",\"auth_uri\":\"%s\",\"token_uri\":\"%s\",\"auth_provider_x509_cert_url\":\"%s\",\"client_x509_cert_url\":\"%s\",\"universe_domain\":\"googleapis.com\"}",
+                        projectId,
+                        privateKeyId,
+                        privateKey.replace("\n", "\\n"),
+                        clientEmail,
+                        clientId,
+                        authUri,
+                        tokenUri,
+                        authProviderCertUrl,
+                        clientCertUrl);
 
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(
-                                new ByteArrayInputStream(fixedJson.getBytes(StandardCharsets.UTF_8))))
+                                new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))))
                         .build();
                 FirebaseApp.initializeApp(options);
                 log.info("Firebase Admin SDK initialized successfully");
