@@ -124,6 +124,9 @@ public class AdminTimeOffService {
                     request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "storniert", adminName);
                     timeOffRequestRepository.save(request);
+
+                    sendPushNotification(request.getEmployeeId(), "storniert", request.getType());
+
                     return true;
                 })
                 .orElse(false);
