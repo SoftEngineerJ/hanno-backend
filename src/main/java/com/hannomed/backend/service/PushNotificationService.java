@@ -4,6 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Notification;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Service
 @Slf4j
@@ -108,13 +111,10 @@ public class PushNotificationService {
                     .setNotification(notification)
                     .build();
 
-            String response = FirebaseMessaging.getInstance().sendAsync(message).get();
+            String response = FirebaseMessaging.getInstance().send(message);
             log.info("Push notification sent successfully: {}", response);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Failed to send push notification: {}", e.getMessage());
-            if (e.getCause() != null) {
-                log.error("Caused by: {}", e.getCause().getMessage());
-            }
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to send push notification: {} | ErrorCode: {}", e.getMessage(), e.getErrorCode(), e);
         }
     }
 
