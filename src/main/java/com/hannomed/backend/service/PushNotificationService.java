@@ -24,14 +24,15 @@ public class PushNotificationService {
 
     @PostConstruct
     public void init() {
-        log.info("Firebase credentials length: {}",
-                firebaseCredentialsJson != null ? firebaseCredentialsJson.length() : 0);
         try {
             if (FirebaseApp.getApps().isEmpty() && firebaseCredentialsJson != null
                     && !firebaseCredentialsJson.isEmpty()) {
+                // Fix: \n in private_key korrekt ersetzen
+                String fixedJson = firebaseCredentialsJson.replace("\\n", "\n");
+
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(
-                                new ByteArrayInputStream(firebaseCredentialsJson.getBytes(StandardCharsets.UTF_8))))
+                                new ByteArrayInputStream(fixedJson.getBytes(StandardCharsets.UTF_8))))
                         .build();
                 FirebaseApp.initializeApp(options);
                 log.info("Firebase Admin SDK initialized successfully");
