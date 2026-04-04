@@ -203,6 +203,7 @@ public class TimeOffService {
         String employeeName = employeeRepository.findById(request.getEmployeeId())
                 .map(e -> e.getFirstName() + " " + e.getLastName())
                 .orElse("Unbekannt");
+        System.out.println(">>> Broadcasting SSE event for: " + employeeName + " type: " + request.getType());
         EventController.broadcastNewRequest(employeeName, request.getType());
     }
 
