@@ -222,6 +222,19 @@ public class AdminTimeOffService {
         dto.put("id", request.getId());
         dto.put("employeeId", request.getEmployeeId());
         dto.put("employeeName", getEmployeeName(request.getEmployeeId()));
+
+        // Add employee details
+        var employee = employeeRepository.findById(request.getEmployeeId()).orElse(null);
+        if (employee != null) {
+            dto.put("profilePhotoUrl", employee.getProfilePhotoUrl());
+            dto.put("standort", employee.getStandort());
+            dto.put("position", employee.getPosition());
+        } else {
+            dto.put("profilePhotoUrl", null);
+            dto.put("standort", null);
+            dto.put("position", null);
+        }
+
         dto.put("type", request.getType() != null ? request.getType() : "");
         dto.put("reason", request.getType() != null ? request.getType() : "");
         dto.put("startDate", request.getStartDate() != null ? request.getStartDate().toString() : "");
