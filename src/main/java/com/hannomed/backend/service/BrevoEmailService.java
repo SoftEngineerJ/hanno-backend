@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -151,14 +153,17 @@ public class BrevoEmailService {
                     requestTypeText = requestType;
             }
 
+            String formattedStartDate = formatDateGerman(startDate);
+            String formattedEndDate = formatDateGerman(endDate);
+
             String subject = "Antragsstatus aktualisiert - " + requestTypeText + " " + statusEmoji;
             String htmlContent = "<html><body>" +
                     "<p>Hallo " + firstName + ",</p>" +
                     "<p>Der Status deines Antrags wurde aktualisiert:</p>" +
                     "<div style='background-color: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;'>" +
                     "<p style='margin: 0;'><strong>Antragstyp:</strong> " + requestTypeText + "</p>" +
-                    "<p style='margin: 8px 0 0 0;'><strong>Zeitraum:</strong> " + startDate + " bis " + endDate + "</p>"
-                    +
+                    "<p style='margin: 8px 0 0 0;'><strong>Zeitraum:</strong> " + formattedStartDate + " bis "
+                    + formattedEndDate + "</p>" +
                     "<p style='margin: 8px 0 0 0;'><strong>Status:</strong> " + statusEmoji + " " + statusText + "</p>"
                     +
                     "</div>" +
@@ -171,6 +176,17 @@ public class BrevoEmailService {
 
         } catch (Exception e) {
             log.error("Brevo API - Exception: {} | Cause: {}", e.getMessage(), e.getCause());
+        }
+    }
+
+    private String formatDateGerman(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty() || dateStr.equals("-"))
+            return "-";
+        try {
+            LocalDate date = LocalDate.parse(dateStr);
+            return date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        } catch (Exception e) {
+            return dateStr;
         }
     }
 
