@@ -107,6 +107,73 @@ public class BrevoEmailService {
         }
     }
 
+    public void sendStatusChangeEmail(String email, String firstName, String requestType, String status,
+            String startDate, String endDate) {
+        try {
+            log.info("Brevo API - Sending status change email to: {}", email);
+
+            String statusText;
+            String statusEmoji;
+            switch (status) {
+                case "genehmigt":
+                    statusText = "genehmigt";
+                    statusEmoji = "✅";
+                    break;
+                case "abgelehnt":
+                    statusText = "abgelehnt";
+                    statusEmoji = "❌";
+                    break;
+                case "storniert":
+                    statusText = "storniert";
+                    statusEmoji = "🚫";
+                    break;
+                case "stornierung_abgelehnt":
+                    statusText = "Stornierung abgelehnt";
+                    statusEmoji = "❌";
+                    break;
+                default:
+                    statusText = status;
+                    statusEmoji = "📋";
+            }
+
+            String requestTypeText;
+            switch (requestType) {
+                case "vacation":
+                    requestTypeText = "Urlaub";
+                    break;
+                case "special":
+                    requestTypeText = "Sonderurlaub";
+                    break;
+                case "compensation":
+                    requestTypeText = "Freizeitausgleich";
+                    break;
+                default:
+                    requestTypeText = requestType;
+            }
+
+            String subject = "Antragsstatus aktualisiert - " + requestTypeText + " " + statusEmoji;
+            String htmlContent = "<html><body>" +
+                    "<p>Hallo " + firstName + ",</p>" +
+                    "<p>Der Status deines Antrags wurde aktualisiert:</p>" +
+                    "<div style='background-color: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;'>" +
+                    "<p style='margin: 0;'><strong>Antragstyp:</strong> " + requestTypeText + "</p>" +
+                    "<p style='margin: 8px 0 0 0;'><strong>Zeitraum:</strong> " + startDate + " bis " + endDate + "</p>"
+                    +
+                    "<p style='margin: 8px 0 0 0;'><strong>Status:</strong> " + statusEmoji + " " + statusText + "</p>"
+                    +
+                    "</div>" +
+                    "<p>Du kannst den Status auch in der App einsehen.</p>" +
+                    "<p>Viele Grüße,<br>Dein HannoApp Team</p>" +
+                    "</body></html>";
+
+            sendEmail(email, firstName, subject, htmlContent);
+            log.info("Brevo API - Status change email sent successfully to: {}", email);
+
+        } catch (Exception e) {
+            log.error("Brevo API - Exception: {} | Cause: {}", e.getMessage(), e.getCause());
+        }
+    }
+
     private void sendEmail(String toEmail, String toName, String subject, String htmlContent) {
         RestTemplate restTemplate = new RestTemplate();
 

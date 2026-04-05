@@ -4,22 +4,27 @@ import com.hannomed.backend.entity.TimeOffRequest;
 import com.hannomed.backend.repository.TimeOffRequestRepository;
 import com.hannomed.backend.repository.EmployeeRepository;
 import com.hannomed.backend.service.PushNotificationService;
+import com.hannomed.backend.service.BrevoEmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminTimeOffService {
 
     private final TimeOffRequestRepository timeOffRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final PushNotificationService pushNotificationService;
+    private final BrevoEmailService brevoEmailService;
 
     private String getEmployeeName(Integer employeeId) {
         if (employeeId == null)
@@ -27,6 +32,24 @@ public class AdminTimeOffService {
         return employeeRepository.findById(employeeId)
                 .map(e -> e.getFirstName() + " " + e.getLastName())
                 .orElse("Unbekannt");
+    }
+
+    private void sendStatusEmail(TimeOffRequest request, String status) {
+        try {
+            employeeRepository.findById(request.getEmployeeId()).ifPresent(employee -> {
+                String startDate = request.getStartDate() != null ? request.getStartDate().toString() : "-";
+                String endDate = request.getEndDate() != null ? request.getEndDate().toString() : "-";
+                brevoEmailService.sendStatusChangeEmail(
+                        employee.getEmail(),
+                        employee.getFirstName(),
+                        request.getType(),
+                        status,
+                        startDate,
+                        endDate);
+            });
+        } catch (Exception e) {
+            log.error("Failed to send status email: {}", e.getMessage());
+        }
     }
 
     private void addHistory(TimeOffRequest request, String action, String adminName) {
@@ -78,6 +101,7 @@ public class AdminTimeOffService {
                     timeOffRequestRepository.save(request);
 
                     sendPushNotification(request.getEmployeeId(), "genehmigt", request.getType());
+                    sendStatusEmail(request, "genehmigt");
 
                     return true;
                 })
@@ -96,6 +120,7 @@ public class AdminTimeOffService {
                     timeOffRequestRepository.save(request);
 
                     sendPushNotification(request.getEmployeeId(), "abgelehnt", request.getType());
+                    sendStatusEmail(request, "abgelehnt");
 
                     return true;
                 })
@@ -110,6 +135,9 @@ public class AdminTimeOffService {
                     request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "storniert", null);
                     timeOffRequestRepository.save(request);
+
+                    sendStatusEmail(request, "storniert");
+
                     return true;
                 })
                 .orElse(false);
@@ -126,6 +154,7 @@ public class AdminTimeOffService {
                     timeOffRequestRepository.save(request);
 
                     sendPushNotification(request.getEmployeeId(), "storniert", request.getType());
+                    sendStatusEmail(request, "storniert");
 
                     return true;
                 })
@@ -141,6 +170,9 @@ public class AdminTimeOffService {
                     request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "stornierung_abgelehnt", adminName);
                     timeOffRequestRepository.save(request);
+
+                    sendStatusEmail(request, "stornierung_abgelehnt");
+
                     return true;
                 })
                 .orElse(false);
@@ -156,6 +188,9 @@ public class AdminTimeOffService {
                     request.setUpdatedAt(LocalDateTime.now(ZoneId.of("Europe/Berlin")));
                     addHistory(request, "zurückgesetzt", adminName);
                     timeOffRequestRepository.save(request);
+
+                    sendStatusEmail(request, "wartend");
+
                     return true;
                 })
                 .orElse(false);
