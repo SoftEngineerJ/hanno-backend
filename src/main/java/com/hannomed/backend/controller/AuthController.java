@@ -26,4 +26,22 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Map<String, String> data) {
+        String email = data.get("email");
+
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "E-Mail erforderlich"));
+        }
+
+        boolean success = authService.resetPassword(email);
+
+        if (success) {
+            return ResponseEntity
+                    .ok(Map.of("success", true, "message", "E-Mail mit neuen Zugangsdaten wurde gesendet"));
+        }
+        return ResponseEntity
+                .ok(Map.of("success", true, "message", "Wenn die E-Mail existiert, wurde eine E-Mail gesendet"));
+    }
 }

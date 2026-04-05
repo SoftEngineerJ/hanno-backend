@@ -82,6 +82,31 @@ public class BrevoEmailService {
         }
     }
 
+    public void sendResetPasswordEmail(String email, String firstName, String username, String newPassword) {
+        try {
+            log.info("Brevo API - Sending reset password email to: {}", email);
+
+            String subject = "Deine Zugangsdaten für HannoApp";
+            String htmlContent = "<html><body>" +
+                    "<p>Hallo " + firstName + ",</p>" +
+                    "<p>Du hast Deine Zugangsdaten angefordert. Hier sind Deine aktuellen Daten:</p>" +
+                    "<h3>Deine Zugangsdaten:</h3>" +
+                    "<p><strong>Benutzername:</strong> " + username + "<br>" +
+                    "<strong>Neues Passwort:</strong> " + newPassword + "</p>" +
+                    "<p>Bitte melde Dich mit diesen Daten an und ändere Dein Passwort nach dem Login.</p>" +
+                    "<p>Bei Fragen wende Dich an Deinen Administrator.</p>" +
+                    "<p>Viele Grüße,<br>Dein HannoApp Team</p>" +
+                    "</body></html>";
+
+            sendEmail(email, firstName, subject, htmlContent);
+            log.info("Brevo API - Reset password email sent successfully to: {}", email);
+
+        } catch (Exception e) {
+            log.error("Brevo API - Exception: {} | Cause: {}", e.getMessage(), e.getCause());
+            throw new RuntimeException("Fehler beim Senden der E-Mail: " + e.getMessage(), e);
+        }
+    }
+
     private void sendEmail(String toEmail, String toName, String subject, String htmlContent) {
         RestTemplate restTemplate = new RestTemplate();
 

@@ -2,6 +2,7 @@ package com.hannomed.backend.service;
 
 import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.EmployeeRepository;
+import com.hannomed.backend.service.BrevoEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class AuthService {
 
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BrevoEmailService brevoEmailService;
 
     public Map<String, Object> login(String username, String password) {
         Optional<Employee> employeeOpt = employeeRepository.findByUsername(username);
@@ -56,5 +58,31 @@ public class AuthService {
 
         employee.setFcmToken(fcmToken);
         employeeRepository.save(employee);
+    }
+
+    public boolean resetPassword(String email) {
+        Optional<Employee> employeeOpt = employeeRepository.findByEmail(email);
+
+        if (employeeOpt.isEmpty()) {
+            return false;
+        }
+
+        Employee employee = employeeOpt.get();
+
+        if (employee.getDeletedAt() != null) {
+            return false;
+        }
+
+        String newPassword = brevoEmailService.generatePassword();
+        employee.setPassword(passwordEncoder.encode(newPassword));
+        employeeRepository.save(employee);
+
+        brevoEmailService.sendResetPasswordEmail(
+                employee.getEmail(),
+                employee.getFirstName(),
+                employee.getUsername(),
+                newPassword);
+
+        return true;
     }
 }
