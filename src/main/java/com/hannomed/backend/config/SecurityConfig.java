@@ -34,8 +34,12 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/v3/api-docs.yaml").permitAll()
 
-                        // Admin endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Admin endpoints (except auth - must be more specific)
+                        .requestMatchers("/api/admin/employees/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/timeoff/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/admins/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/vacation-accounts/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/events/**").hasRole("ADMIN")
 
                         // Employee endpoints - require authentication
                         .requestMatchers("/timeoff/**").authenticated()
