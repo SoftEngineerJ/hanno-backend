@@ -71,10 +71,9 @@ public class TimeOffService {
                     : 0;
         }
 
-        // vacation_entitlement already includes carryover, so just subtract
-        // initialUsedDays
-        int resturlaub = urlaubsanspruch - initialUsedDays - genommeneTage - geplanteTage;
-        int available = urlaubsanspruch - initialUsedDays - genommeneTage;
+        // vacation_entitlement + carryover - initialUsedDays - taken - planned
+        int resturlaub = urlaubsanspruch + carryOver - initialUsedDays - genommeneTage - geplanteTage;
+        int available = urlaubsanspruch + carryOver - initialUsedDays - genommeneTage;
 
         Map<String, Object> response = new HashMap<>();
         response.put("genommeneTage", genommeneTage);

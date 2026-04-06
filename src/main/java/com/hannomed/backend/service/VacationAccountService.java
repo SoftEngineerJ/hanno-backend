@@ -129,9 +129,9 @@ public class VacationAccountService {
             }
         }
 
-        // Calculate totals
-        int totalVacation = account.getVacationEntitlement() +
-                (account.getCarriedOver() != null ? account.getCarriedOver() : 0);
+        // Calculate totals - vacation_entitlement already includes carryover
+        int totalVacation = account.getVacationEntitlement() != null ? account.getVacationEntitlement()
+                : DEFAULT_VACATION_ENTITLEMENT;
         int totalUsedVacation = (account.getInitialUsedDays() != null ? account.getInitialUsedDays() : 0)
                 + usedVacationDays;
         int remainingVacation = totalVacation - totalUsedVacation;
