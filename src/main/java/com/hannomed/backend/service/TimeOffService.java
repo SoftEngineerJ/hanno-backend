@@ -82,6 +82,7 @@ public class TimeOffService {
         response.put("urlaubsanspruch", urlaubsanspruch);
         response.put("carryOver", carryOver);
         response.put("available", available);
+        response.put("totalVacationEntitlement", urlaubsanspruch + carryOver);
 
         return response;
     }
