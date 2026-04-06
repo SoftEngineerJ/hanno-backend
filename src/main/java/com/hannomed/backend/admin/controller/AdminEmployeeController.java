@@ -31,7 +31,11 @@ public class AdminEmployeeController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createEmployee(@RequestBody Map<String, String> data) {
-        return ResponseEntity.ok(adminEmployeeService.createEmployee(data));
+        try {
+            return ResponseEntity.ok(adminEmployeeService.createEmployee(data));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
