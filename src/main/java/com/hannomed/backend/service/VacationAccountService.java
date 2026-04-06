@@ -52,14 +52,24 @@ public class VacationAccountService {
             VacationAccount prev = previousYearAccount.get();
             LocalDate today = LocalDate.now();
 
-            // Check if carry-over has expired (March 31)
-            if (prev.getCarriedOver() != null && prev.getCarriedOver() > 0) {
+            int originalCarryOver = prev.getCarriedOver() != null ? prev.getCarriedOver() : 0;
+
+            if (originalCarryOver > 0) {
+                // Check if carry-over has expired (March 31)
                 if (today.isAfter(LocalDate.of(year, 3, 31))) {
                     // Carry-over expired
                     newAccount.setCarriedOver(0);
                 } else {
-                    // Carry-over still valid
-                    newAccount.setCarriedOver(prev.getCarriedOver());
+                    // Calculate remaining carry-over based on previous year's usage
+                    int baseEntitlement = prev.getVacationEntitlement() != null ? prev.getVacationEntitlement()
+                            : DEFAULT_VACATION_ENTITLEMENT;
+                    int initialUsed = prev.getInitialUsedDays() != null ? prev.getInitialUsedDays() : 0;
+
+                    // If used more than base, the excess came from carry-over
+                    int usedFromCarryOver = Math.max(0, initialUsed - baseEntitlement);
+                    int remainingCarryOver = Math.max(0, originalCarryOver - usedFromCarryOver);
+
+                    newAccount.setCarriedOver(remainingCarryOver);
                     newAccount.setCarriedOverExpiry(LocalDate.of(year, 3, 31));
                 }
             }
