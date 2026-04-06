@@ -221,10 +221,20 @@ public class AdminTimeOffService {
         Map<String, Object> dto = new java.util.HashMap<>();
         dto.put("id", request.getId());
         dto.put("employeeId", request.getEmployeeId());
-        dto.put("employeeName", getEmployeeName(request.getEmployeeId()));
+
+        // Check if employee is deleted
+        var employee = employeeRepository.findById(request.getEmployeeId()).orElse(null);
+        boolean isEmployeeDeleted = employee != null && employee.getDeletedAt() != null;
+
+        if (isEmployeeDeleted) {
+            dto.put("employeeName", "Mitarbeiter gelöscht");
+            dto.put("employeeDeleted", true);
+        } else {
+            dto.put("employeeName", getEmployeeName(request.getEmployeeId()));
+            dto.put("employeeDeleted", false);
+        }
 
         // Add employee details
-        var employee = employeeRepository.findById(request.getEmployeeId()).orElse(null);
         if (employee != null) {
             dto.put("profilePhotoUrl", employee.getProfilePhotoUrl());
             dto.put("standort", employee.getStandort());
