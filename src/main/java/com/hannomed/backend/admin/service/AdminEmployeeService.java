@@ -33,10 +33,22 @@ public class AdminEmployeeService {
     }
 
     public Map<String, Object> createEmployee(Map<String, String> data) {
+        // Check if email already exists
+        if (employeeRepository.findByEmail(data.get("email")).isPresent()) {
+            throw new RuntimeException("E-Mail wird bereits verwendet");
+        }
+
+        // Check if username already exists
+        String username = data.get("username");
+        if (username != null && !username.isEmpty()) {
+            if (employeeRepository.findByUsername(username).isPresent()) {
+                throw new RuntimeException("Benutzername wird bereits verwendet");
+            }
+        }
+
         Employee employee = new Employee();
         employee.setEmail(data.get("email"));
 
-        String username = data.get("username");
         if (username == null || username.isEmpty()) {
             String firstName = data.get("firstName");
             if (firstName != null && !firstName.isEmpty()) {
