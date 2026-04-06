@@ -46,21 +46,6 @@ public class Employee {
 
     private String standort;
 
-    @Column(name = "vacation_days")
-    private Integer vacationDays;
-
-    @Column(name = "used_vacation_days")
-    private Integer usedVacationDays;
-
-    @Column(name = "special_vacation")
-    private Integer specialVacation;
-
-    @Column(name = "compensation")
-    private Integer compensation;
-
-    @Column(name = "carried_over_days")
-    private Integer carriedOverDays;
-
     @Column(name = "deleted_at")
     private java.time.LocalDateTime deletedAt;
 }

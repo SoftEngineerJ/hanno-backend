@@ -51,7 +51,7 @@ public class VacationAccountService {
         if (previousYearAccount.isPresent()) {
             VacationAccount prev = previousYearAccount.get();
             LocalDate today = LocalDate.now();
-            
+
             // Check if carry-over has expired (March 31)
             if (prev.getCarriedOver() != null && prev.getCarriedOver() > 0) {
                 if (today.isAfter(LocalDate.of(year, 3, 31))) {
@@ -66,6 +66,28 @@ public class VacationAccountService {
         }
 
         return vacationAccountRepository.save(newAccount);
+    }
+
+    public VacationAccount createAccountWithInitialValues(Integer employeeId, Integer year,
+            Integer initialUsedDays, Integer specialLeaveInitial, Integer compensationInitial, Integer carriedOver) {
+
+        VacationAccount account = getOrCreateAccount(employeeId, year);
+
+        if (initialUsedDays != null) {
+            account.setInitialUsedDays(initialUsedDays);
+        }
+        if (specialLeaveInitial != null) {
+            account.setSpecialLeaveInitial(specialLeaveInitial);
+        }
+        if (compensationInitial != null) {
+            account.setCompensationInitial(compensationInitial);
+        }
+        if (carriedOver != null) {
+            account.setCarriedOver(carriedOver);
+            account.setCarriedOverExpiry(LocalDate.of(year, 3, 31));
+        }
+
+        return vacationAccountRepository.save(account);
     }
 
     public Map<String, Object> getAccountWithCalculations(Integer employeeId, Integer year) {
@@ -108,16 +130,16 @@ public class VacationAccountService {
         }
 
         // Calculate totals
-        int totalVacation = account.getVacationEntitlement() + 
-            (account.getCarriedOver() != null ? account.getCarriedOver() : 0);
-        int totalUsedVacation = (account.getInitialUsedDays() != null ? account.getInitialUsedDays() : 0) 
-            + usedVacationDays;
+        int totalVacation = account.getVacationEntitlement() +
+                (account.getCarriedOver() != null ? account.getCarriedOver() : 0);
+        int totalUsedVacation = (account.getInitialUsedDays() != null ? account.getInitialUsedDays() : 0)
+                + usedVacationDays;
         int remainingVacation = totalVacation - totalUsedVacation;
 
-        int totalSpecialLeave = (account.getSpecialLeaveInitial() != null ? account.getSpecialLeaveInitial() : 0) 
-            + usedSpecialLeave;
-        int totalCompensation = (account.getCompensationInitial() != null ? account.getCompensationInitial() : 0) 
-            + usedCompensation;
+        int totalSpecialLeave = (account.getSpecialLeaveInitial() != null ? account.getSpecialLeaveInitial() : 0)
+                + usedSpecialLeave;
+        int totalCompensation = (account.getCompensationInitial() != null ? account.getCompensationInitial() : 0)
+                + usedCompensation;
 
         Map<String, Object> response = new HashMap<>();
         response.put("id", account.getId());
@@ -129,7 +151,7 @@ public class VacationAccountService {
         response.put("initialUsedDays", account.getInitialUsedDays());
         response.put("specialLeaveInitial", account.getSpecialLeaveInitial());
         response.put("compensationInitial", account.getCompensationInitial());
-        
+
         // Calculated values
         response.put("usedVacationDays", usedVacationDays);
         response.put("totalUsedVacation", totalUsedVacation);
@@ -142,11 +164,11 @@ public class VacationAccountService {
         return response;
     }
 
-    public VacationAccount updateInitialValues(Integer employeeId, Integer year, 
+    public VacationAccount updateInitialValues(Integer employeeId, Integer year,
             Integer initialUsedDays, Integer specialLeaveInitial, Integer compensationInitial) {
-        
+
         VacationAccount account = getOrCreateAccount(employeeId, year);
-        
+
         if (initialUsedDays != null) {
             account.setInitialUsedDays(initialUsedDays);
         }
@@ -166,11 +188,11 @@ public class VacationAccountService {
 
     public Map<String, Object> getAllAccountsForYear(Integer year) {
         List<VacationAccount> accounts = vacationAccountRepository.findByYear(year);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("year", year);
         response.put("accounts", accounts);
-        
+
         return response;
     }
 }

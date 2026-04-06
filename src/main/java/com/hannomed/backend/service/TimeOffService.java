@@ -2,8 +2,10 @@ package com.hannomed.backend.service;
 
 import com.hannomed.backend.controller.EventController;
 import com.hannomed.backend.entity.TimeOffRequest;
+import com.hannomed.backend.entity.VacationAccount;
 import com.hannomed.backend.repository.TimeOffRequestRepository;
 import com.hannomed.backend.repository.EmployeeRepository;
+import com.hannomed.backend.repository.VacationAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class TimeOffService {
 
     private final TimeOffRequestRepository timeOffRequestRepository;
     private final EmployeeRepository employeeRepository;
+    private final VacationAccountRepository vacationAccountRepository;
     private static final int DEFAULT_URLAUBSANSPRUCH = 30;
 
     public Map<String, Object> getUrlaubsstatistik(Integer employeeId, int jahr) {
@@ -50,9 +54,10 @@ public class TimeOffService {
         int urlaubsanspruch = DEFAULT_URLAUBSANSPRUCH;
 
         int carryOver = 0;
-        if (employeeRepository.findById(employeeId).isPresent()) {
-            carryOver = employeeRepository.findById(employeeId).get().getCarriedOverDays() != null
-                    ? employeeRepository.findById(employeeId).get().getCarriedOverDays()
+        Optional<VacationAccount> vacationAccount = vacationAccountRepository.findByEmployeeIdAndYear(employeeId, jahr);
+        if (vacationAccount.isPresent()) {
+            carryOver = vacationAccount.get().getCarriedOver() != null
+                    ? vacationAccount.get().getCarriedOver()
                     : 0;
         }
 

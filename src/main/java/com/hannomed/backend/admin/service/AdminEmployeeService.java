@@ -76,41 +76,6 @@ public class AdminEmployeeService {
         employee.setTourNumber(data.get("tourNumber"));
         employee.setStandort(data.get("standort"));
 
-        if (data.containsKey("vacationDays") && data.get("vacationDays") != null
-                && !data.get("vacationDays").isEmpty()) {
-            employee.setVacationDays(Integer.parseInt(data.get("vacationDays")));
-        } else {
-            employee.setVacationDays(30);
-        }
-
-        if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null
-                && !data.get("usedVacationDays").isEmpty()) {
-            employee.setUsedVacationDays(Integer.parseInt(data.get("usedVacationDays")));
-        } else {
-            employee.setUsedVacationDays(0);
-        }
-
-        if (data.containsKey("specialVacation") && data.get("specialVacation") != null
-                && !data.get("specialVacation").isEmpty()) {
-            employee.setSpecialVacation(Integer.parseInt(data.get("specialVacation")));
-        } else {
-            employee.setSpecialVacation(0);
-        }
-
-        if (data.containsKey("compensation") && data.get("compensation") != null
-                && !data.get("compensation").isEmpty()) {
-            employee.setCompensation(Integer.parseInt(data.get("compensation")));
-        } else {
-            employee.setCompensation(0);
-        }
-
-        if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null
-                && !data.get("carriedOverDays").isEmpty()) {
-            employee.setCarriedOverDays(Integer.parseInt(data.get("carriedOverDays")));
-        } else {
-            employee.setCarriedOverDays(0);
-        }
-
         Employee saved = employeeRepository.save(employee);
 
         // E-Mail mit Zugangsdaten senden
@@ -128,7 +93,33 @@ public class AdminEmployeeService {
 
         // Urlaubskonto für aktuelles Jahr erstellen
         int currentYear = LocalDate.now().getYear();
-        vacationAccountService.getOrCreateAccount(saved.getId(), currentYear);
+
+        // Optional: initial values from request
+        Integer initialUsedDays = null;
+        Integer specialLeaveInitial = null;
+        Integer compensationInitial = null;
+        Integer carriedOver = null;
+
+        if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null
+                && !data.get("usedVacationDays").isEmpty()) {
+            initialUsedDays = Integer.parseInt(data.get("usedVacationDays"));
+        }
+        if (data.containsKey("specialVacation") && data.get("specialVacation") != null
+                && !data.get("specialVacation").isEmpty()) {
+            specialLeaveInitial = Integer.parseInt(data.get("specialVacation"));
+        }
+        if (data.containsKey("compensation") && data.get("compensation") != null
+                && !data.get("compensation").isEmpty()) {
+            compensationInitial = Integer.parseInt(data.get("compensation"));
+        }
+        if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null
+                && !data.get("carriedOverDays").isEmpty()) {
+            carriedOver = Integer.parseInt(data.get("carriedOverDays"));
+        }
+
+        vacationAccountService.createAccountWithInitialValues(
+                saved.getId(), currentYear,
+                initialUsedDays, specialLeaveInitial, compensationInitial, carriedOver);
 
         return mapToDto(saved);
     }
@@ -154,16 +145,6 @@ public class AdminEmployeeService {
                         employee.setTourNumber(data.get("tourNumber"));
                     if (data.containsKey("standort"))
                         employee.setStandort(data.get("standort"));
-                    if (data.containsKey("vacationDays") && data.get("vacationDays") != null)
-                        employee.setVacationDays(Integer.parseInt(data.get("vacationDays")));
-                    if (data.containsKey("usedVacationDays") && data.get("usedVacationDays") != null)
-                        employee.setUsedVacationDays(Integer.parseInt(data.get("usedVacationDays")));
-                    if (data.containsKey("specialVacation") && data.get("specialVacation") != null)
-                        employee.setSpecialVacation(Integer.parseInt(data.get("specialVacation")));
-                    if (data.containsKey("compensation") && data.get("compensation") != null)
-                        employee.setCompensation(Integer.parseInt(data.get("compensation")));
-                    if (data.containsKey("carriedOverDays") && data.get("carriedOverDays") != null)
-                        employee.setCarriedOverDays(Integer.parseInt(data.get("carriedOverDays")));
 
                     Employee saved = employeeRepository.save(employee);
                     return mapToDto(saved);
@@ -208,11 +189,6 @@ public class AdminEmployeeService {
         map.put("tourNumber", employee.getTourNumber() != null ? employee.getTourNumber() : "");
         map.put("standort", employee.getStandort() != null ? employee.getStandort() : "");
         map.put("profilePhotoUrl", employee.getProfilePhotoUrl() != null ? employee.getProfilePhotoUrl() : "");
-        map.put("vacationDays", employee.getVacationDays() != null ? employee.getVacationDays() : 30);
-        map.put("usedVacationDays", employee.getUsedVacationDays() != null ? employee.getUsedVacationDays() : 0);
-        map.put("specialVacation", employee.getSpecialVacation() != null ? employee.getSpecialVacation() : 0);
-        map.put("compensation", employee.getCompensation() != null ? employee.getCompensation() : 0);
-        map.put("carriedOverDays", employee.getCarriedOverDays() != null ? employee.getCarriedOverDays() : 0);
         map.put("deletedAt", employee.getDeletedAt() != null ? employee.getDeletedAt().toString() : null);
         return map;
     }
