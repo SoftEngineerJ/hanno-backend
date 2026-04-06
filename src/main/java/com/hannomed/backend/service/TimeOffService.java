@@ -55,17 +55,26 @@ public class TimeOffService {
         }
 
         int urlaubsanspruch = DEFAULT_URLAUBSANSPRUCH;
+        int initialUsedDays = 0;
 
         int carryOver = 0;
         Optional<VacationAccount> vacationAccount = vacationAccountRepository.findByEmployeeIdAndYear(employeeId, jahr);
         if (vacationAccount.isPresent()) {
+            urlaubsanspruch = vacationAccount.get().getVacationEntitlement() != null
+                    ? vacationAccount.get().getVacationEntitlement()
+                    : DEFAULT_URLAUBSANSPRUCH;
+            initialUsedDays = vacationAccount.get().getInitialUsedDays() != null
+                    ? vacationAccount.get().getInitialUsedDays()
+                    : 0;
             carryOver = vacationAccount.get().getCarriedOver() != null
                     ? vacationAccount.get().getCarriedOver()
                     : 0;
         }
 
-        int resturlaub = urlaubsanspruch + carryOver - genommeneTage - geplanteTage;
-        int available = urlaubsanspruch + carryOver - genommeneTage;
+        // vacation_entitlement already includes carryover, so just subtract
+        // initialUsedDays
+        int resturlaub = urlaubsanspruch - initialUsedDays - genommeneTage - geplanteTage;
+        int available = urlaubsanspruch - initialUsedDays - genommeneTage;
 
         Map<String, Object> response = new HashMap<>();
         response.put("genommeneTage", genommeneTage);
