@@ -76,7 +76,7 @@ public class TimeOffService {
         int available = urlaubsanspruch + carryOver - initialUsedDays - genommeneTage;
 
         Map<String, Object> response = new HashMap<>();
-        response.put("genommeneTage", genommeneTage);
+        response.put("genommeneTage", genommeneTage + initialUsedDays);
         response.put("geplanteTage", geplanteTage);
         response.put("resturlaub", resturlaub);
         response.put("urlaubsanspruch", urlaubsanspruch);
