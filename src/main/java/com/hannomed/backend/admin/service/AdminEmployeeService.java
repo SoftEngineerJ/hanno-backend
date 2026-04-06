@@ -153,11 +153,13 @@ public class AdminEmployeeService {
     }
 
     public boolean deleteEmployee(Integer id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        return employeeRepository.findById(id)
+                .map(employee -> {
+                    employee.setDeletedAt(java.time.LocalDateTime.now());
+                    employeeRepository.save(employee);
+                    return true;
+                })
+                .orElse(false);
     }
 
     public long getEmployeeCount() {
