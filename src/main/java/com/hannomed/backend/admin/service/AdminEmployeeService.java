@@ -3,10 +3,12 @@ package com.hannomed.backend.admin.service;
 import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.EmployeeRepository;
 import com.hannomed.backend.service.BrevoEmailService;
+import com.hannomed.backend.service.VacationAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ public class AdminEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final BrevoEmailService brevoEmailService;
     private final PasswordEncoder passwordEncoder;
+    private final VacationAccountService vacationAccountService;
 
     public List<Map<String, Object>> getAllEmployees() {
         return employeeRepository.findAll().stream()
@@ -122,6 +125,10 @@ public class AdminEmployeeService {
             // E-Mail Fehler loggen aber nicht den Erfolg blockieren
             System.err.println("Fehler beim Senden der Willkommens-E-Mail: " + e.getMessage());
         }
+
+        // Urlaubskonto für aktuelles Jahr erstellen
+        int currentYear = LocalDate.now().getYear();
+        vacationAccountService.getOrCreateAccount(saved.getId(), currentYear);
 
         return mapToDto(saved);
     }
