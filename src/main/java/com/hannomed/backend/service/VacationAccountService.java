@@ -52,35 +52,16 @@ public class VacationAccountService {
             VacationAccount prev = previousYearAccount.get();
             LocalDate today = LocalDate.now();
 
-            // Calculate remaining vacation from previous year
-            int prevEntitlement = prev.getVacationEntitlement() != null ? prev.getVacationEntitlement()
-                    : DEFAULT_VACATION_ENTITLEMENT;
+            // Get the original carry-over from previous year
             int prevCarriedOver = prev.getCarriedOver() != null ? prev.getCarriedOver() : 0;
-            int prevInitialUsed = prev.getInitialUsedDays() != null ? prev.getInitialUsedDays() : 0;
-
-            // Get approved requests for previous year
-            LocalDate prevYearStart = LocalDate.of(year - 1, 1, 1);
-            LocalDate prevYearEnd = LocalDate.of(year - 1, 12, 31);
-            List<TimeOffRequest> prevYearRequests = timeOffRequestRepository
-                    .findByEmployeeIdAndStartDateBetweenOrderByStartDateDesc(prev.getEmployeeId(), prevYearStart,
-                            prevYearEnd);
-
-            int prevUsedRequests = prevYearRequests.stream()
-                    .filter(req -> "genehmigt".equals(req.getStatus()))
-                    .mapToInt(to -> to.getRequestedDays() != null ? to.getRequestedDays() : 0)
-                    .sum();
-
-            int totalPrevVacation = prevEntitlement + prevCarriedOver;
-            int totalPrevUsed = prevInitialUsed + prevUsedRequests;
-            int remainingFromPrevYear = Math.max(0, totalPrevVacation - totalPrevUsed);
 
             // Check if carry-over has expired (March 31)
             if (today.isAfter(LocalDate.of(year, 3, 31))) {
                 // Carry-over expired
                 newAccount.setCarriedOver(0);
             } else {
-                // Use remaining from previous year as carry-over
-                newAccount.setCarriedOver(remainingFromPrevYear);
+                // Use original carry-over from previous year (not calculated remaining)
+                newAccount.setCarriedOver(prevCarriedOver);
                 newAccount.setCarriedOverExpiry(LocalDate.of(year, 3, 31));
             }
         }
