@@ -227,7 +227,8 @@ public class AdminTimeOffService {
         boolean isEmployeeDeleted = employee != null && employee.getDeletedAt() != null;
 
         if (isEmployeeDeleted) {
-            dto.put("employeeName", "Mitarbeiter gelöscht");
+            String originalName = getEmployeeName(request.getEmployeeId());
+            dto.put("employeeName", originalName + " (Mitarbeiter gelöscht)");
             dto.put("employeeDeleted", true);
         } else {
             dto.put("employeeName", getEmployeeName(request.getEmployeeId()));
