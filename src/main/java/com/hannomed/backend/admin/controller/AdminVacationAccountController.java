@@ -1,4 +1,4 @@
-package com.hannomed.backend.controller;
+package com.hannomed.backend.admin.controller;
 
 import com.hannomed.backend.entity.VacationAccount;
 import com.hannomed.backend.repository.EmployeeRepository;
@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/vacation-accounts")
+@RequestMapping("/api/admin/vacation-accounts")
 @RequiredArgsConstructor
-public class VacationAccountController {
+public class AdminVacationAccountController {
 
     private final VacationAccountService vacationAccountService;
     private final EmployeeRepository employeeRepository;
@@ -46,14 +46,14 @@ public class VacationAccountController {
             @PathVariable Integer employeeId,
             @PathVariable Integer year,
             @RequestBody Map<String, Integer> body) {
-
+        
         Integer initialUsedDays = body.get("initialUsedDays");
         Integer specialLeaveInitial = body.get("specialLeaveInitial");
         Integer compensationInitial = body.get("compensationInitial");
-
+        
         VacationAccount updated = vacationAccountService.updateInitialValues(
                 employeeId, year, initialUsedDays, specialLeaveInitial, compensationInitial);
-
+        
         return ResponseEntity.ok(updated);
     }
 
@@ -62,18 +62,18 @@ public class VacationAccountController {
         List<Integer> employeeIds = employeeRepository.findAll().stream()
                 .map(e -> e.getId())
                 .toList();
-
+        
         int created = 0;
         for (Integer employeeId : employeeIds) {
             vacationAccountService.getOrCreateAccount(employeeId, year);
             created++;
         }
-
+        
         Map<String, Object> response = new HashMap<>();
         response.put("year", year);
         response.put("created", created);
         response.put("message", "Urlaubskonten für " + created + " Mitarbeiter erstellt");
-
+        
         return ResponseEntity.ok(response);
     }
 }
