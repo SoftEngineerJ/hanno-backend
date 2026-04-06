@@ -151,6 +151,7 @@ public class VacationAccountService {
         response.put("initialUsedDays", account.getInitialUsedDays());
         response.put("specialLeaveInitial", account.getSpecialLeaveInitial());
         response.put("compensationInitial", account.getCompensationInitial());
+        response.put("totalVacationEntitlement", totalVacation);
 
         // Calculated values
         response.put("usedVacationDays", usedVacationDays);
