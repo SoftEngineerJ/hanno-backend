@@ -117,13 +117,13 @@ public class VacationAccountService {
             int days = req.getRequestedDays() != null ? req.getRequestedDays() : 0;
 
             switch (req.getType()) {
-                case "URLAUB":
+                case "Urlaub":
                     usedVacationDays += days;
                     break;
-                case "SONDERURLAUB":
+                case "Sonderurlaub":
                     usedSpecialLeave += days;
                     break;
-                case "FREIZEITAUSGLEICH":
+                case "Freizeitausgleich":
                     usedCompensation += days;
                     break;
             }

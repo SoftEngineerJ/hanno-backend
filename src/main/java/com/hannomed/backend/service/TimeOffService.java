@@ -36,18 +36,21 @@ public class TimeOffService {
         int geplanteTage = 0;
 
         for (TimeOffRequest req : anfragen) {
+            if (req.getEndDate().isBefore(jahrStart))
+                continue;
+            if (req.getStartDate().isAfter(jahrEnde))
+                continue;
+
             if ("genehmigt".equals(req.getStatus())) {
-                if (req.getEndDate().isBefore(jahrStart))
-                    continue;
-                if (req.getStartDate().isAfter(jahrEnde))
-                    continue;
-                genommeneTage += req.getRequestedDays();
+                // Only count "Urlaub" for vacation days
+                if ("Urlaub".equals(req.getType())) {
+                    genommeneTage += req.getRequestedDays();
+                }
             } else if ("wartend".equals(req.getStatus())) {
-                if (req.getEndDate().isBefore(jahrStart))
-                    continue;
-                if (req.getStartDate().isAfter(jahrEnde))
-                    continue;
-                geplanteTage += req.getRequestedDays();
+                // Only count "Urlaub" for planned days
+                if ("Urlaub".equals(req.getType())) {
+                    geplanteTage += req.getRequestedDays();
+                }
             }
         }
 
