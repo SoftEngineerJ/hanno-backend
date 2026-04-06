@@ -165,7 +165,7 @@ public class VacationAccountService {
     }
 
     public VacationAccount updateInitialValues(Integer employeeId, Integer year,
-            Integer initialUsedDays, Integer specialLeaveInitial, Integer compensationInitial) {
+            Integer initialUsedDays, Integer specialLeaveInitial, Integer compensationInitial, Integer carriedOver) {
 
         VacationAccount account = getOrCreateAccount(employeeId, year);
 
@@ -177,6 +177,10 @@ public class VacationAccountService {
         }
         if (compensationInitial != null) {
             account.setCompensationInitial(compensationInitial);
+        }
+        if (carriedOver != null) {
+            account.setCarriedOver(carriedOver);
+            account.setCarriedOverExpiry(LocalDate.of(year, 3, 31));
         }
 
         return vacationAccountRepository.save(account);

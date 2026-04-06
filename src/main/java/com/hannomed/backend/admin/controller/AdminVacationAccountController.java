@@ -46,14 +46,15 @@ public class AdminVacationAccountController {
             @PathVariable Integer employeeId,
             @PathVariable Integer year,
             @RequestBody Map<String, Integer> body) {
-        
+
         Integer initialUsedDays = body.get("initialUsedDays");
         Integer specialLeaveInitial = body.get("specialLeaveInitial");
         Integer compensationInitial = body.get("compensationInitial");
-        
+        Integer carriedOver = body.get("carriedOver");
+
         VacationAccount updated = vacationAccountService.updateInitialValues(
-                employeeId, year, initialUsedDays, specialLeaveInitial, compensationInitial);
-        
+                employeeId, year, initialUsedDays, specialLeaveInitial, compensationInitial, carriedOver);
+
         return ResponseEntity.ok(updated);
     }
 
@@ -62,18 +63,18 @@ public class AdminVacationAccountController {
         List<Integer> employeeIds = employeeRepository.findAll().stream()
                 .map(e -> e.getId())
                 .toList();
-        
+
         int created = 0;
         for (Integer employeeId : employeeIds) {
             vacationAccountService.getOrCreateAccount(employeeId, year);
             created++;
         }
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("year", year);
         response.put("created", created);
         response.put("message", "Urlaubskonten für " + created + " Mitarbeiter erstellt");
-        
+
         return ResponseEntity.ok(response);
     }
 }
