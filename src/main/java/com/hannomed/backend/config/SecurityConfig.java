@@ -30,21 +30,9 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/admin/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/v3/api-docs.yaml").permitAll()
 
-                        // Admin endpoints (except auth - must be more specific)
-                        .requestMatchers("/api/admin/employees/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/timeoff/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/admins/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/vacation-accounts/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/events/**").hasRole("ADMIN")
-
-                        // Employee endpoints - require authentication
-                        .requestMatchers("/timeoff/**").authenticated()
-                        .requestMatchers("/employees/**").authenticated()
-
+                        // All other endpoints require authentication (JWT will handle it)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
