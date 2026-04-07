@@ -75,6 +75,19 @@ public class AdminEmployeeController {
         }
     }
 
+    @PostMapping("/{id}/restore")
+    public ResponseEntity<Map<String, Object>> restoreEmployee(@PathVariable Integer id) {
+        try {
+            boolean restored = adminEmployeeService.restoreEmployee(id);
+            if (restored) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Mitarbeiter wiederhergestellt"));
+            }
+            return ResponseEntity.status(404).body(Map.of("success", false, "error", "Mitarbeiter nicht gefunden"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}/password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @PathVariable Integer id,

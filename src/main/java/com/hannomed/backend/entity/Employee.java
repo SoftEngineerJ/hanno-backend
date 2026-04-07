@@ -48,4 +48,10 @@ public class Employee {
 
     @Column(name = "deleted_at")
     private java.time.LocalDateTime deletedAt;
+
+    @Column(name = "deleted_by")
+    private String deletedBy;
+
+    @Column(name = "delete_reason")
+    private String deleteReason;
 }

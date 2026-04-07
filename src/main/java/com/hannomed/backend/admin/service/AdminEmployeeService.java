@@ -160,6 +160,20 @@ public class AdminEmployeeService {
         return employeeRepository.findById(id)
                 .map(employee -> {
                     employee.setDeletedAt(java.time.LocalDateTime.now());
+                    employee.setDeletedBy("admin");
+                    employee.setDeleteReason("admin_delete");
+                    employeeRepository.save(employee);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    public boolean restoreEmployee(Integer id) {
+        return employeeRepository.findById(id)
+                .map(employee -> {
+                    employee.setDeletedAt(null);
+                    employee.setDeletedBy(null);
+                    employee.setDeleteReason(null);
                     employeeRepository.save(employee);
                     return true;
                 })
@@ -213,6 +227,8 @@ public class AdminEmployeeService {
         map.put("standort", employee.getStandort() != null ? employee.getStandort() : "");
         map.put("profilePhotoUrl", employee.getProfilePhotoUrl() != null ? employee.getProfilePhotoUrl() : "");
         map.put("deletedAt", employee.getDeletedAt() != null ? employee.getDeletedAt().toString() : null);
+        map.put("deletedBy", employee.getDeletedBy() != null ? employee.getDeletedBy() : null);
+        map.put("deleteReason", employee.getDeleteReason() != null ? employee.getDeleteReason() : null);
         return map;
     }
 }
