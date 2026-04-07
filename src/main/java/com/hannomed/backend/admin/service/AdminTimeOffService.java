@@ -77,17 +77,41 @@ public class AdminTimeOffService {
 
     public List<Map<String, Object>> getAllPendingRequests() {
         List<TimeOffRequest> requests = timeOffRequestRepository.findByStatusOrderByCreatedAtDesc("wartend");
-        return requests.stream().map(this::mapToDto).toList();
+        return requests.stream()
+                .filter(request -> {
+                    // Only show requests from non-deleted employees
+                    return employeeRepository.findById(request.getEmployeeId())
+                            .map(employee -> employee.getDeletedAt() == null)
+                            .orElse(false); // Hide if employee doesn't exist
+                })
+                .map(this::mapToDto)
+                .toList();
     }
 
     public List<Map<String, Object>> getAllRequests() {
         List<TimeOffRequest> requests = timeOffRequestRepository.findAllByOrderByCreatedAtDesc();
-        return requests.stream().map(this::mapToDto).toList();
+        return requests.stream()
+                .filter(request -> {
+                    // Only show requests from non-deleted employees
+                    return employeeRepository.findById(request.getEmployeeId())
+                            .map(employee -> employee.getDeletedAt() == null)
+                            .orElse(false); // Hide if employee doesn't exist
+                })
+                .map(this::mapToDto)
+                .toList();
     }
 
     public List<Map<String, Object>> getRequestsByStatus(String status) {
         List<TimeOffRequest> requests = timeOffRequestRepository.findByStatusOrderByCreatedAtDesc(status);
-        return requests.stream().map(this::mapToDto).toList();
+        return requests.stream()
+                .filter(request -> {
+                    // Only show requests from non-deleted employees
+                    return employeeRepository.findById(request.getEmployeeId())
+                            .map(employee -> employee.getDeletedAt() == null)
+                            .orElse(false); // Hide if employee doesn't exist
+                })
+                .map(this::mapToDto)
+                .toList();
     }
 
     @Transactional
