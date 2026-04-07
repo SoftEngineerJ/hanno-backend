@@ -29,6 +29,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/admin/auth/**").permitAll()
+                        .requestMatchers("/api/admin/events").permitAll() // SSE endpoint with manual token validation
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
 

@@ -1,13 +1,18 @@
 package com.hannomed.backend.controller;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @RestController
@@ -15,6 +20,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class EventController {
 
     private static final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+
+    @Value("${jwt.secret:hanno-admin-secret-key-for-production-2024}")
+    private String jwtSecret;
 
     public static void broadcastNewRequest(String employeeName, String type) {
         String data = String.format("{\"type\":\"new_request\",\"employeeName\":\"%s\",\"requestType\":\"%s\"}",
@@ -60,7 +68,22 @@ public class EventController {
     }
 
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseEntity<SseEmitter> streamEvents() {
+    public ResponseEntity<SseEmitter> streamEvents(@RequestParam(required = false) String token) {
+        // Validate JWT token if provided
+        if (token != null && !token.isEmpty()) {
+            try {
+                Jwts.parser()
+                        .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
+                        .build()
+                        .parseSignedClaims(token);
+            } catch (Exception e) {
+                return ResponseEntity.status(401).build();
+            }
+        } else {
+            // No token provided - unauthorized
+            return ResponseEntity.status(401).build();
+        }
+
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         emitters.add(emitter);
 
