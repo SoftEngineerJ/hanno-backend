@@ -62,6 +62,19 @@ public class AdminEmployeeController {
         }
     }
 
+    @DeleteMapping("/{id}/hard")
+    public ResponseEntity<Map<String, Object>> hardDeleteEmployee(@PathVariable Integer id) {
+        try {
+            boolean deleted = adminEmployeeService.hardDeleteEmployee(id);
+            if (deleted) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Mitarbeiter endgültig gelöscht"));
+            }
+            return ResponseEntity.status(404).body(Map.of("success", false, "error", "Mitarbeiter nicht gefunden"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}/password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @PathVariable Integer id,

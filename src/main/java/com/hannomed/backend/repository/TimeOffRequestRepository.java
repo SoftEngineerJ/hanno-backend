@@ -19,4 +19,6 @@ public interface TimeOffRequestRepository extends JpaRepository<TimeOffRequest, 
     List<TimeOffRequest> findAllByOrderByCreatedAtDesc();
 
     long countByStatus(String status);
+
+    void deleteByEmployeeId(Integer employeeId);
 }

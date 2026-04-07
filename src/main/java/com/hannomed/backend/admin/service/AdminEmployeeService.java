@@ -2,6 +2,8 @@ package com.hannomed.backend.admin.service;
 
 import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.repository.EmployeeRepository;
+import com.hannomed.backend.repository.TimeOffRequestRepository;
+import com.hannomed.backend.repository.VacationAccountRepository;
 import com.hannomed.backend.service.BrevoEmailService;
 import com.hannomed.backend.service.VacationAccountService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class AdminEmployeeService {
     private final BrevoEmailService brevoEmailService;
     private final PasswordEncoder passwordEncoder;
     private final VacationAccountService vacationAccountService;
+    private final TimeOffRequestRepository timeOffRequestRepository;
+    private final VacationAccountRepository vacationAccountRepository;
 
     public List<Map<String, Object>> getAllEmployees() {
         return employeeRepository.findAll().stream()
@@ -157,6 +161,23 @@ public class AdminEmployeeService {
                 .map(employee -> {
                     employee.setDeletedAt(java.time.LocalDateTime.now());
                     employeeRepository.save(employee);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    public boolean hardDeleteEmployee(Integer id) {
+        return employeeRepository.findById(id)
+                .map(employee -> {
+                    // 1. Delete related vacation accounts
+                    vacationAccountRepository.deleteByEmployeeId(id);
+
+                    // 2. Delete related time off requests
+                    timeOffRequestRepository.deleteByEmployeeId(id);
+
+                    // 3. Finally delete the employee
+                    employeeRepository.deleteById(id);
+
                     return true;
                 })
                 .orElse(false);
