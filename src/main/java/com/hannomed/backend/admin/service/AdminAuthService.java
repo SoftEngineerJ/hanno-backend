@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -79,6 +80,7 @@ public class AdminAuthService {
                 .claim("lastName", admin.getLastName() != null ? admin.getLastName() : "")
                 .claim("fullName", fullName.trim())
                 .claim("role", admin.getRole() != null ? admin.getRole() : "admin")
+                .claim("roles", List.of("ROLE_" + (admin.getRole() != null ? admin.getRole().toUpperCase() : "ADMIN")))
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
