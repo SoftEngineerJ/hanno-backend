@@ -69,18 +69,25 @@ public class EventController {
 
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> streamEvents(@RequestParam(required = false) String token) {
-        // Validate JWT token if provided
+        System.out.println("🔍 SSE Request - Token present: " + (token != null && !token.isEmpty()));
         if (token != null && !token.isEmpty()) {
             try {
+                System.out.println("🔍 SSE Token length: " + token.length());
+                System.out.println("🔍 SSE Token start: " + token.substring(0, Math.min(20, token.length())) + "...");
+
                 Jwts.parser()
                         .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
                         .build()
                         .parseSignedClaims(token);
+
+                System.out.println("✅ SSE Token validation successful");
             } catch (Exception e) {
+                System.out.println("❌ SSE Token validation failed: " + e.getMessage());
                 return ResponseEntity.status(401).build();
             }
         } else {
             // No token provided - unauthorized
+            System.out.println("❌ No SSE token provided");
             return ResponseEntity.status(401).build();
         }
 
