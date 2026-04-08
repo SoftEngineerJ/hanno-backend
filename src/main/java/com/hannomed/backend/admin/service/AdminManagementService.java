@@ -49,6 +49,7 @@ public class AdminManagementService {
         admin.setFirstName(request.get("firstName"));
         admin.setLastName(request.get("lastName"));
         admin.setRole(request.getOrDefault("role", "admin"));
+        admin.setCreatedAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Europe/Berlin")));
 
         Admin saved = adminRepository.save(admin);
         return mapToDto(saved);
