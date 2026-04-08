@@ -2,6 +2,7 @@ package com.hannomed.backend.service;
 
 import com.hannomed.backend.admin.repository.AdminRepository;
 import com.hannomed.backend.controller.EventController;
+import com.hannomed.backend.entity.Employee;
 import com.hannomed.backend.entity.TimeOffRequest;
 import com.hannomed.backend.entity.VacationAccount;
 import com.hannomed.backend.repository.TimeOffRequestRepository;
@@ -162,8 +163,18 @@ public class TimeOffService {
     }
 
     public void submitTimeOffRequest(Map<String, Object> body) {
+        Integer employeeId = (Integer) body.get("employeeId");
+
+        // Verify employee exists and is not deleted
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Mitarbeiter nicht gefunden"));
+
+        if (employee.getDeletedAt() != null) {
+            throw new RuntimeException("Konto wurde gelöscht. Bitte melden Sie sich erneut an.");
+        }
+
         TimeOffRequest request = new TimeOffRequest();
-        request.setEmployeeId((Integer) body.get("employeeId"));
+        request.setEmployeeId(employeeId);
         request.setType((String) body.get("type"));
 
         // Parse dates - accept both dd.MM.yyyy and yyyy-MM-dd formats
@@ -329,6 +340,14 @@ public class TimeOffService {
     public void cancelTimeOff(Integer id) {
         TimeOffRequest request = timeOffRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        // Verify employee still exists and is not deleted
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Mitarbeiter nicht gefunden"));
+
+        if (employee.getDeletedAt() != null) {
+            throw new RuntimeException("Konto wurde gelöscht. Bitte melden Sie sich erneut an.");
+        }
 
         // Abgelehnte Anträge können nicht storniert werden
         if ("abgelehnt".equalsIgnoreCase(request.getStatus())) {
