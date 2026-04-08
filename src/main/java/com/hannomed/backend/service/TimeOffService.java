@@ -1,5 +1,6 @@
 package com.hannomed.backend.service;
 
+import com.hannomed.backend.admin.repository.AdminRepository;
 import com.hannomed.backend.controller.EventController;
 import com.hannomed.backend.entity.TimeOffRequest;
 import com.hannomed.backend.entity.VacationAccount;
@@ -7,6 +8,7 @@ import com.hannomed.backend.repository.TimeOffRequestRepository;
 import com.hannomed.backend.repository.EmployeeRepository;
 import com.hannomed.backend.repository.VacationAccountRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,11 +21,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TimeOffService {
 
     private final TimeOffRequestRepository timeOffRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final VacationAccountRepository vacationAccountRepository;
+    private final AdminRepository adminRepository;
+    private final BrevoEmailService brevoEmailService;
     private static final int DEFAULT_URLAUBSANSPRUCH = 30;
 
     public Map<String, Object> getUrlaubsstatistik(Integer employeeId, int jahr) {
@@ -222,6 +227,103 @@ public class TimeOffService {
                 .orElse("Unbekannt");
         System.out.println(">>> Broadcasting SSE event for: " + employeeName + " type: " + request.getType());
         EventController.broadcastNewRequest(employeeName, request.getType());
+
+        // Send email to all admins
+        sendAdminNotification("neuer_antrag", employeeName, request.getType(),
+                request.getStartDate().toString(), request.getEndDate().toString(), request.getRequestedDays());
+    }
+
+    private void sendAdminNotification(String type, String employeeName, String requestType,
+            String startDate, String endDate, Integer days) {
+        try {
+            List<com.hannomed.backend.admin.entity.Admin> admins = adminRepository.findAll();
+
+            if (admins.isEmpty()) {
+                log.warn("Keine Admins gefunden für E-Mail-Benachrichtigung");
+                return;
+            }
+
+            String typeText;
+            String typeEmoji;
+            switch (type) {
+                case "neuer_antrag":
+                    typeText = "Neuer Antrag";
+                    typeEmoji = "NEW";
+                    break;
+                case "stornierung_beantragt":
+                    typeText = "Stornierung beantragt";
+                    typeEmoji = "CANCEL";
+                    break;
+                case "stornierung_direct":
+                    typeText = "Stornierung";
+                    typeEmoji = "CANCEL";
+                    break;
+                default:
+                    typeText = type;
+                    typeEmoji = "INFO";
+            }
+
+            String requestTypeText;
+            switch (requestType) {
+                case "Urlaub":
+                    requestTypeText = "Urlaub";
+                    break;
+                case "Sonderurlaub":
+                    requestTypeText = "Sonderurlaub";
+                    break;
+                case "Freizeitausgleich":
+                    requestTypeText = "Freizeitausgleich";
+                    break;
+                default:
+                    requestTypeText = requestType;
+            }
+
+            String formattedStartDate = formatDateGerman(startDate);
+            String formattedEndDate = formatDateGerman(endDate);
+
+            String subject = typeEmoji + " " + typeText + " - " + employeeName + " (" + requestTypeText + ")";
+            String htmlContent = "<html><body>" +
+                    "<p>Hallo Admin,</p>" +
+                    "<p>Ein neuer Antrag wurde eingereicht:</p>" +
+                    "<div style='background-color: #e3f2fd; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #2196F3;'>"
+                    +
+                    "<p style='margin: 0;'><strong>Mitarbeiter:</strong> " + employeeName + "</p>" +
+                    "<p style='margin: 8px 0 0 0;'><strong>Antragstyp:</strong> " + requestTypeText + "</p>" +
+                    "<p style='margin: 8px 0 0 0;'><strong>Zeitraum:</strong> " + formattedStartDate + " bis "
+                    + formattedEndDate + "</p>" +
+                    "<p style='margin: 8px 0 0 0;'><strong>Tage:</strong> " + days + "</p>" +
+                    "<p style='margin: 8px 0 0 0;'><strong>Aktion:</strong> " + typeText + "</p>" +
+                    "</div>" +
+                    "<p>Bitte überprüfen Sie den Antrag im Admin-Portal.</p>" +
+                    "<p>Viele Grüße,<br>HannoApp System</p>" +
+                    "</body></html>";
+
+            for (com.hannomed.backend.admin.entity.Admin admin : admins) {
+                try {
+                    brevoEmailService.sendEmail(
+                            admin.getEmail(),
+                            admin.getFirstName() != null ? admin.getFirstName() : "Admin",
+                            subject,
+                            htmlContent);
+                    log.info("Admin-E-Mail gesendet an: {}", admin.getEmail());
+                } catch (Exception e) {
+                    log.error("Fehler beim Senden der E-Mail an Admin {}: {}", admin.getEmail(), e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Fehler bei Admin-Benachrichtigung: {}", e.getMessage());
+        }
+    }
+
+    private String formatDateGerman(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty() || dateStr.equals("-"))
+            return "-";
+        try {
+            LocalDate date = LocalDate.parse(dateStr);
+            return date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        } catch (Exception e) {
+            return dateStr;
+        }
     }
 
     public void cancelTimeOff(Integer id) {
@@ -243,6 +345,10 @@ public class TimeOffService {
                     .map(e -> e.getFirstName() + " " + e.getLastName())
                     .orElse("Unbekannt");
             EventController.broadcastCancellationRequest(employeeName, request.getType());
+
+            // Send email to admins - Stornierung beantragt
+            sendAdminNotification("stornierung_beantragt", employeeName, request.getType(),
+                    request.getStartDate().toString(), request.getEndDate().toString(), request.getRequestedDays());
         } else {
             // For wartend status, directly cancel and notify admin
             request.setStatus("storniert");
@@ -250,6 +356,10 @@ public class TimeOffService {
                     .map(e -> e.getFirstName() + " " + e.getLastName())
                     .orElse("Unbekannt");
             EventController.broadcastRequestCancelled(employeeName, request.getType());
+
+            // Send email to admins - Stornierung direkt
+            sendAdminNotification("stornierung_direct", employeeName, request.getType(),
+                    request.getStartDate().toString(), request.getEndDate().toString(), request.getRequestedDays());
         }
         timeOffRequestRepository.save(request);
     }

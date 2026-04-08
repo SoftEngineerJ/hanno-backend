@@ -190,7 +190,7 @@ public class BrevoEmailService {
         }
     }
 
-    private void sendEmail(String toEmail, String toName, String subject, String htmlContent) {
+    public void sendEmail(String toEmail, String toName, String subject, String htmlContent) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
