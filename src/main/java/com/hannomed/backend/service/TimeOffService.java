@@ -169,7 +169,10 @@ public class TimeOffService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Mitarbeiter nicht gefunden"));
 
+        System.out.println(">>> DEBUG: Employee " + employeeId + " deletedAt = " + employee.getDeletedAt());
+
         if (employee.getDeletedAt() != null) {
+            System.out.println(">>> DEBUG: Employee is deleted, throwing error!");
             throw new RuntimeException("Konto wurde gelöscht. Bitte melden Sie sich erneut an.");
         }
 
