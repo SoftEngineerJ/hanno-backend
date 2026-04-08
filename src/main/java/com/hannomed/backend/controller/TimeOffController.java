@@ -36,16 +36,22 @@ public class TimeOffController {
     }
 
     @PostMapping("/urlaubantrag")
-    public ResponseEntity<Void> submitTimeOffRequest(@RequestBody Map<String, Object> body) {
-        System.out.println(">>> POST /timeoff/urlaubantrag received: " + body);
-        System.out.println(">>> Keys in body: " + body.keySet());
-        timeOffService.submitTimeOffRequest(body);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> submitTimeOffRequest(@RequestBody Map<String, Object> body) {
+        try {
+            timeOffService.submitTimeOffRequest(body);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/stornieren/{id}")
-    public ResponseEntity<Void> cancelTimeOff(@PathVariable Integer id) {
-        timeOffService.cancelTimeOff(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> cancelTimeOff(@PathVariable Integer id) {
+        try {
+            timeOffService.cancelTimeOff(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }
