@@ -53,6 +53,8 @@ public class EmployeeController {
         return employeeRepository.findById(employeeId)
                 .map(employee -> {
                     employee.setDeletedAt(java.time.LocalDateTime.now());
+                    employee.setDeletedBy("self");
+                    employee.setDeleteReason("self_delete");
                     employeeRepository.save(employee);
                     return ResponseEntity.ok().<Void>build();
                 })
