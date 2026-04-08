@@ -21,6 +21,9 @@ public class EmployeeController {
     public ResponseEntity<Map<String, Object>> getEmployeeProfile(@PathVariable Integer employeeId) {
         return employeeRepository.findById(employeeId)
                 .map(employee -> {
+                    if (employee.getDeletedAt() != null) {
+                        return ResponseEntity.status(401).<Map<String, Object>>build();
+                    }
                     Map<String, Object> profile = Map.of(
                             "id", employee.getId(),
                             "email", employee.getEmail() != null ? employee.getEmail() : "",
@@ -43,9 +46,16 @@ public class EmployeeController {
             @PathVariable Integer employeeId,
             @RequestBody Map<String, String> body) {
 
-        String fcmToken = body.get("fcmToken");
-        authService.updateFcmToken(employeeId, fcmToken);
-        return ResponseEntity.ok().build();
+        return employeeRepository.findById(employeeId)
+                .map(employee -> {
+                    if (employee.getDeletedAt() != null) {
+                        return ResponseEntity.status(401).<Void>build();
+                    }
+                    String fcmToken = body.get("fcmToken");
+                    authService.updateFcmToken(employeeId, fcmToken);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{employeeId}")
