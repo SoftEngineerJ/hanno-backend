@@ -29,7 +29,11 @@ public class AdminManagementController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createAdmin(@RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(adminManagementService.createAdmin(request));
+        try {
+            return ResponseEntity.ok(adminManagementService.createAdmin(request));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")

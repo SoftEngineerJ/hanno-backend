@@ -38,6 +38,10 @@ public class AdminManagementService {
             throw new RuntimeException("Benutzername bereits vergeben");
         }
 
+        if (adminRepository.findByEmail(request.get("email")).isPresent()) {
+            throw new RuntimeException("E-Mail-Adresse bereits vergeben");
+        }
+
         Admin admin = new Admin();
         admin.setUsername(request.get("username"));
         admin.setEmail(request.get("email"));
