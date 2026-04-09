@@ -51,8 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = claims.getSubject();
 
                 // Check if user is deleted (for employees)
-                if (claims.get("role") != null && !claims.get("role").equals("ADMIN")) {
-                    // This is an employee token, check database for deleted status
+                String role = claims.get("role") != null ? claims.get("role").toString() : "";
+                if (!role.equalsIgnoreCase("admin")) {
+                    // This is an employee token (not admin), check database for deleted status
                     var employeeOpt = employeeRepository.findByUsername(username);
                     if (employeeOpt.isPresent()) {
                         var employee = employeeOpt.get();
