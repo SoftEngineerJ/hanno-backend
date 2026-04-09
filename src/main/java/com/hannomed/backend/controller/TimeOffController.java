@@ -1,6 +1,7 @@
 package com.hannomed.backend.controller;
 
 import com.hannomed.backend.repository.EmployeeRepository;
+import com.hannomed.backend.repository.TimeOffRequestRepository;
 import com.hannomed.backend.service.TimeOffService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ public class TimeOffController {
 
     private final TimeOffService timeOffService;
     private final EmployeeRepository employeeRepository;
+    private final TimeOffRequestRepository timeOffRequestRepository;
 
     @GetMapping("/urlaubstatistik/{employeeId}")
     public ResponseEntity<Map<String, Object>> getUrlaubsstatistik(
@@ -61,6 +63,17 @@ public class TimeOffController {
     @PostMapping("/urlaubantrag")
     public ResponseEntity<?> submitTimeOffRequest(@RequestBody Map<String, Object> body) {
         try {
+            Integer employeeId = (Integer) body.get("employeeId");
+            if (employeeId != null) {
+                var employee = employeeRepository.findById(employeeId);
+                if (employee.isEmpty()) {
+                    return ResponseEntity.status(401).body(Map.of("error", "Mitarbeiter nicht gefunden"));
+                }
+                if (employee.get().getDeletedAt() != null) {
+                    return ResponseEntity.status(401)
+                            .body(Map.of("error", "Konto wurde gelöscht. Bitte melden Sie sich erneut an."));
+                }
+            }
             timeOffService.submitTimeOffRequest(body);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
@@ -71,6 +84,19 @@ public class TimeOffController {
     @PostMapping("/stornieren/{id}")
     public ResponseEntity<?> cancelTimeOff(@PathVariable Integer id) {
         try {
+            var requestOpt = timeOffRequestRepository.findById(id);
+            if (requestOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            var request = requestOpt.get();
+            var employee = employeeRepository.findById(request.getEmployeeId());
+            if (employee.isEmpty()) {
+                return ResponseEntity.status(401).body(Map.of("error", "Mitarbeiter nicht gefunden"));
+            }
+            if (employee.get().getDeletedAt() != null) {
+                return ResponseEntity.status(401)
+                        .body(Map.of("error", "Konto wurde gelöscht. Bitte melden Sie sich erneut an."));
+            }
             timeOffService.cancelTimeOff(id);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
