@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             response.setCharacterEncoding("UTF-8");
                             response.setContentType("application/json");
                             response.getWriter()
-                                    .write("{\"error\": \"Dein Konto wurde gelöscht. Bitte melde dich erneut an.\"}");
+                                    .write("{\"error\": \"Dein Konto wurde vom Admin gelöscht. Bitte melde dich erneut an.\"}");
                             return;
                         }
                     } catch (NumberFormatException ignored) {
