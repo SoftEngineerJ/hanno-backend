@@ -48,22 +48,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .parseSignedClaims(token)
                         .getPayload();
 
-                String username = claims.getSubject();
+                String subject = claims.getSubject();
 
                 // Check if user is deleted (for employees)
                 String role = claims.get("role") != null ? claims.get("role").toString() : "";
                 if (!role.equalsIgnoreCase("admin")) {
-                    // This is an employee token (not admin), check database for deleted status
-                    var employeeOpt = employeeRepository.findByUsername(username);
-                    if (employeeOpt.isPresent()) {
-                        var employee = employeeOpt.get();
-                        if (employee.getDeletedAt() != null) {
+                    // Employee JWT uses employeeId as subject
+                    try {
+                        Integer employeeId = Integer.valueOf(subject);
+                        var employeeOpt = employeeRepository.findById(employeeId);
+                        if (employeeOpt.isPresent() && employeeOpt.get().getDeletedAt() != null) {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter()
                                     .write("{\"error\": \"Konto wurde gelöscht. Bitte melden Sie sich erneut an.\"}");
                             return;
                         }
+                    } catch (NumberFormatException ignored) {
+                        // If subject is not an employeeId, skip deletion check here
                     }
                 }
 
@@ -75,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null,
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(subject, null,
                         authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
