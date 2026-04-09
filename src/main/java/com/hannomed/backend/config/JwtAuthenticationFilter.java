@@ -59,9 +59,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         var employeeOpt = employeeRepository.findById(employeeId);
                         if (employeeOpt.isPresent() && employeeOpt.get().getDeletedAt() != null) {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setCharacterEncoding("UTF-8");
                             response.setContentType("application/json");
                             response.getWriter()
-                                    .write("{\"error\": \"Konto wurde gelöscht. Bitte melden Sie sich erneut an.\"}");
+                                    .write("{\"error\": \"Dein Konto wurde gelöscht. Bitte melde dich erneut an.\"}");
                             return;
                         }
                     } catch (NumberFormatException ignored) {
