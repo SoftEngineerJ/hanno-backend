@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Entity
-@Table(name = "vacation_accounts")
+@Table(name = "vacation_accounts", schema = "hannoapp")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

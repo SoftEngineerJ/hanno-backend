@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Entity
-@Table(name = "time_off_requests")
+@Table(name = "time_off_requests", schema = "hannoapp")
 @Data
 public class TimeOffRequest {
 
